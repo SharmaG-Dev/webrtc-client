@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:2400'
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://werbrtc-server.onrender.com'
 
 let socketInstance: Socket | null = null
 
@@ -18,7 +18,7 @@ export function useSocket() {
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
-        autoConnect: false, // Changed to false for manual control
+        autoConnect: false, 
       })
     }
     return socketInstance
