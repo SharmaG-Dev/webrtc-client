@@ -1,8 +1,8 @@
-[00:00:08.453] Server  LOG      ✓ Ready in 6.6s
-[00:00:18.041] Server  LOG      ○ Compiling / ...
-[00:00:34.578] Server  WARN     ⚠ Cross origin request detected from 9000-firebase-webrtc-client-1762492474252.cluster-ubrd2huk7jh6otbgyei4h62ope.cloudworkstations.dev to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+[00:00:04.862] Server  LOG      ✓ Ready in 3.9s
+[00:00:07.900] Server  LOG      ○ Compiling / ...
+[00:00:17.051] Server  WARN     ⚠ Cross origin request detected from 9000-firebase-webrtc-client-1762492474252.cluster-ubrd2huk7jh6otbgyei4h62ope.cloudworkstations.dev to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
 Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
-[00:00:34.909] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+[00:00:18.067] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
 
 - A server/client branch `if (typeof window !== 'undefined')`.
 - Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
@@ -38,4 +38,3 @@ It can also happen if the client has a browser extension installed which messes 
                           >
                   ...
 
-[00:06:25.691] Server  LOG      ✓ Compiled in 269ms

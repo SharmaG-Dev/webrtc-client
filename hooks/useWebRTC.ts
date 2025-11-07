@@ -11,7 +11,10 @@ interface UseWebRTCProps {
 export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map())
   const dataChannelsRef = useRef<Map<string, RTCDataChannel>>(new Map())
-  const negotiatingRef = useRef<Set<string>>(new Set()) // Track negotiation state
+  const negotiatingRef = useRef<Set<string>>(new Set())
+  // ✅ Store pending ICE candidates
+  const pendingCandidatesRef = useRef<Map<string, RTCIceCandidateInit[]>>(new Map())
+  
   const [connectionStatuses, setConnectionStatuses] = useState<Map<string, any>>(new Map())
   const [receivedMessages, setReceivedMessages] = useState<any[]>([])
 
@@ -47,14 +50,21 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
     }
 
     negotiatingRef.current.delete(deviceIp)
+    pendingCandidatesRef.current.delete(deviceIp) // ✅ Clear pending candidates
     updateConnectionStatus(deviceIp, 'disconnected')
     console.log(`🧹 Cleaned up ${deviceIp}`)
   }, [updateConnectionStatus])
 
-
+  // ✅ FIXED: Handle negotiation properly
   const handleNegotiationNeeded = useCallback(async (deviceIp: string, peerConnection: RTCPeerConnection) => {
     if (negotiatingRef.current.has(deviceIp)) {
       console.log(`⏳ Already negotiating for ${deviceIp}, skipping...`)
+      return
+    }
+
+    // ✅ Check signaling state
+    if (peerConnection.signalingState !== 'stable') {
+      console.log(`⚠️ Signaling state not stable for ${deviceIp}: ${peerConnection.signalingState}`)
       return
     }
 
@@ -63,10 +73,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
 
     try {
       console.log(`📝 Creating offer for ${deviceIp}`)
-      const offer = await peerConnection.createOffer({
-        offerToReceiveAudio: false,
-        offerToReceiveVideo: false
-      })
+      const offer = await peerConnection.createOffer()
 
       console.log(`📝 Setting local description for ${deviceIp}`)
       await peerConnection.setLocalDescription(offer)
@@ -74,7 +81,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
       console.log(`📤 Sending offer to ${deviceIp}`)
       emit('offer', {
         targetIp: deviceIp,
-        sdp: offer
+        sdp: peerConnection.localDescription
       })
 
       console.log(`✅ Offer sent for ${deviceIp}`)
@@ -82,7 +89,10 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
       console.error(`❌ Negotiation error for ${deviceIp}:`, error)
       updateConnectionStatus(deviceIp, 'failed')
     } finally {
-      negotiatingRef.current.delete(deviceIp)
+      // ✅ Remove negotiating flag after a delay
+      setTimeout(() => {
+        negotiatingRef.current.delete(deviceIp)
+      }, 1000)
     }
   }, [emit, updateConnectionStatus])
 
@@ -103,13 +113,14 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
     const peerConnection = new RTCPeerConnection(iceServers)
     peerConnectionsRef.current.set(targetIp, peerConnection)
 
+    // ✅ Create data channel
     const dataChannel = peerConnection.createDataChannel('fileChannel', {
       ordered: true,
       maxRetransmits: 10
     })
     dataChannelsRef.current.set(targetIp, dataChannel)
 
-    // ✅ KEY: Handle negotiationneeded event
+    // ✅ FIXED: Only handle negotiation when needed
     peerConnection.onnegotiationneeded = async () => {
       console.log(`🔄 negotiationneeded event for ${targetIp}`)
       await handleNegotiationNeeded(targetIp, peerConnection)
@@ -122,6 +133,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
 
     dataChannel.onclose = () => {
       console.log(`🔴 Data channel closed for ${targetIp}`)
+      updateConnectionStatus(targetIp, 'disconnected')
     }
 
     dataChannel.onmessage = (event) => {
@@ -164,8 +176,8 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
       }
     }
 
-    // Trigger initial negotiation
-    await handleNegotiationNeeded(targetIp, peerConnection)
+    // ✅ REMOVED: Don't manually trigger negotiation - let onnegotiationneeded handle it
+    // The data channel creation will automatically trigger negotiationneeded
 
   }, [emit, updateConnectionStatus, cleanupPeerConnection, handleNegotiationNeeded, iceServers])
 
@@ -193,7 +205,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
     return status?.status === 'connected'
   }, [connectionStatuses])
 
-  // Handle incoming offers
+  // ✅ FIXED: Handle incoming offers
   useEffect(() => {
     if (!isSocketConnected) return
 
@@ -208,12 +220,6 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
 
       const peerConnection = new RTCPeerConnection(iceServers)
       peerConnectionsRef.current.set(from, peerConnection)
-
-      // ✅ Handle negotiationneeded for receiver too
-      peerConnection.onnegotiationneeded = async () => {
-        console.log(`🔄 negotiationneeded event (receiver) for ${from}`)
-        // Don't create offer here for receiver, just log
-      }
 
       peerConnection.ondatachannel = (event) => {
         const channel = event.channel
@@ -256,12 +262,30 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
       peerConnection.oniceconnectionstatechange = () => {
         const state = peerConnection.iceConnectionState
         console.log(`🔄 ICE state (receiver) ${from}:`, state)
+        
+        if (state === 'connected' || state === 'completed') {
+          updateConnectionStatus(from, 'connected')
+        } else if (state === 'failed' || state === 'disconnected') {
+          updateConnectionStatus(from, 'disconnected')
+        }
       }
 
       try {
         console.log(`📝 Setting remote (offer) for ${from}`)
         await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
         console.log(`✅ Remote set for ${from}`)
+
+        // ✅ Process pending ICE candidates after setting remote description
+        const pending = pendingCandidatesRef.current.get(from) || []
+        for (const candidate of pending) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+            console.log(`✅ Added pending ICE candidate for ${from}`)
+          } catch (error) {
+            console.error(`❌ Error adding pending candidate:`, error)
+          }
+        }
+        pendingCandidatesRef.current.delete(from)
 
         console.log(`📝 Creating answer for ${from}`)
         const answer = await peerConnection.createAnswer()
@@ -274,7 +298,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
         console.log(`📤 Sending answer to ${from}`)
         emit('answer', {
           targetIp: from,
-          sdp: answer
+          sdp: peerConnection.localDescription
         })
         console.log(`✅ Answer sent to ${from}`)
 
@@ -288,7 +312,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
     return () => unsubscribeOffer()
   }, [isSocketConnected, emit, on, cleanupPeerConnection, updateConnectionStatus, iceServers])
 
-  // Handle answers
+  // ✅ Handle answers
   useEffect(() => {
     if (!isSocketConnected) return
 
@@ -305,6 +329,19 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
         console.log(`📝 Setting remote (answer) for ${from}`)
         await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
         console.log(`✅ Answer remote set for ${from}`)
+
+        // ✅ Process pending ICE candidates after setting remote description
+        const pending = pendingCandidatesRef.current.get(from) || []
+        for (const candidate of pending) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+            console.log(`✅ Added pending ICE candidate for ${from}`)
+          } catch (error) {
+            console.error(`❌ Error adding pending candidate:`, error)
+          }
+        }
+        pendingCandidatesRef.current.delete(from)
+
       } catch (error) {
         console.error(`❌ Answer error for ${from}:`, error)
         updateConnectionStatus(from, 'failed')
@@ -314,7 +351,7 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
     return () => unsubscribeAnswer()
   }, [isSocketConnected, on, updateConnectionStatus])
 
-  // Handle ICE
+  // ✅ FIXED: Handle ICE candidates with pending queue
   useEffect(() => {
     if (!isSocketConnected) return
 
@@ -322,10 +359,23 @@ export function useWebRTC({ emit, on, isSocketConnected }: UseWebRTCProps) {
       if (!candidate) return
 
       const peerConnection = peerConnectionsRef.current.get(from)
-      if (!peerConnection) return
+      if (!peerConnection) {
+        console.log(`⚠️ No peer connection for ${from}, ignoring candidate`)
+        return
+      }
 
       try {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+        // ✅ Check if remote description is set
+        if (peerConnection.remoteDescription) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+          console.log(`✅ ICE candidate added for ${from}`)
+        } else {
+          // ✅ Queue candidate if remote description not set yet
+          console.log(`⏳ Queueing ICE candidate for ${from} (no remote description yet)`)
+          const pending = pendingCandidatesRef.current.get(from) || []
+          pending.push(candidate)
+          pendingCandidatesRef.current.set(from, pending)
+        }
       } catch (error) {
         console.error(`❌ ICE error for ${from}:`, error)
       }
