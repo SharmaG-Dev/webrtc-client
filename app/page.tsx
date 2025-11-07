@@ -140,6 +140,10 @@ export default function Home() {
     }
   }, [messageInput, sendMessage])
 
+  const handleClearData = () => {
+    emit('clear')
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -251,6 +255,7 @@ export default function Home() {
               <div className={`w-3 h-3 rounded-full ${connectionStatuses.size > 0 ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`}></div>
               <div className="flex-1">
                 <p className="text-xs text-gray-500 uppercase tracking-wide">Active WebRTC</p>
+                <button onClick={handleClearData}>Clear All</button>
                 <p className="text-lg font-semibold text-blue-600">
                   {Array.from(connectionStatuses.values()).filter(s => s.status === 'connected').length} Connected
                 </p>
