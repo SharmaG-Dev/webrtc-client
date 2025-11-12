@@ -158,7 +158,6 @@
     --color-green-700: #008138;
     --color-emerald-600: #009767;
     --color-blue-50: #eff6ff;
-    --color-blue-100: #dbeafe;
     --color-blue-200: #bedbff;
     --color-blue-500: #3080ff;
     --color-blue-600: #155dfc;
@@ -221,7 +220,6 @@
       --color-green-700: lab(47.0329% -47.0239 31.4788);
       --color-emerald-600: lab(55.0481% -49.9246 15.93);
       --color-blue-50: lab(96.492% -1.14644 -5.11479);
-      --color-blue-100: lab(92.0301% -2.24757 -11.6453);
       --color-blue-200: lab(86.15% -4.04379 -21.0797);
       --color-blue-500: lab(54.1736% 13.3369 -74.6839);
       --color-blue-600: lab(44.0605% 29.0279 -86.0352);
@@ -499,10 +497,6 @@
     margin-block: calc(var(--spacing) * 3);
   }
 
-  .mb-1 {
-    margin-bottom: calc(var(--spacing) * 1);
-  }
-
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
   }
@@ -541,10 +535,6 @@
 
   .h-16 {
     height: calc(var(--spacing) * 16);
-  }
-
-  .max-h-60 {
-    max-height: calc(var(--spacing) * 60);
   }
 
   .min-h-screen {
@@ -665,10 +655,6 @@
     overflow-x: auto;
   }
 
-  .overflow-y-auto {
-    overflow-y: auto;
-  }
-
   .rounded-2xl {
     border-radius: var(--radius-2xl);
   }
@@ -713,10 +699,6 @@
 
   .border-red-200 {
     border-color: var(--color-red-200);
-  }
-
-  .bg-blue-50 {
-    background-color: var(--color-blue-50);
   }
 
   .bg-blue-500 {
@@ -935,10 +917,6 @@
   .tracking-wide {
     --tw-tracking: var(--tracking-wide);
     letter-spacing: var(--tracking-wide);
-  }
-
-  .text-blue-100 {
-    color: var(--color-blue-100);
   }
 
   .text-blue-600 {

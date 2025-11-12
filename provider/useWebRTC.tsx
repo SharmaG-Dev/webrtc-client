@@ -40,7 +40,6 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
     const pushMessage = useCallback(({ message, messageType }: MessageI) => {
         setMessage(prev => [...prev, { message, messageType }]);
         
-        // Auto-remove success messages after 5 seconds
         if (messageType === 'success') {
             setTimeout(() => {
                 removeMessage({ message, messageType });
@@ -53,6 +52,86 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             item => !(item.message === message && item.messageType === messageType)
         ));
     }, []);
+
+    const setupPeerConnectionListeners = useCallback((peerConnection: RTCPeerConnection, deviceIp: string) => {
+        // Connection state change listener
+        peerConnection.addEventListener('connectionstatechange', () => {
+            console.log(`📡 Connection state for ${deviceIp}: ${peerConnection.connectionState}`);
+            
+            switch (peerConnection.connectionState) {
+                case 'connected':
+                    console.log('✅ WebRTC connection established with:', deviceIp);
+                    emit('webrtc-connected', { targetIp: deviceIp });
+                    setConnectedDevices(prev => new Set(prev).add(deviceIp));
+                    pushMessage({ 
+                        message: `Connected to ${deviceIp}`, 
+                        messageType: 'success' 
+                    });
+                    break;
+                case 'connecting':
+                    console.log('🔄 Connecting to:', deviceIp);
+                    break;
+                case 'disconnected':
+                    console.log('⚠️ WebRTC connection disconnected:', deviceIp);
+                    setConnectedDevices(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(deviceIp);
+                        return newSet;
+                    });
+                    break;
+                case 'failed':
+                    console.log('❌ WebRTC connection failed:', deviceIp);
+                    setConnectedDevices(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(deviceIp);
+                        return newSet;
+                    });
+                    emit('webrtc-disconnected', { targetIp: deviceIp });
+                    pushMessage({ 
+                        message: `Connection failed with ${deviceIp}`, 
+                        messageType: 'error' 
+                    });
+                    break;
+                case 'closed':
+                    console.log('🔒 WebRTC connection closed:', deviceIp);
+                    setConnectedDevices(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(deviceIp);
+                        return newSet;
+                    });
+                    emit('webrtc-disconnected', { targetIp: deviceIp });
+                    break;
+            }
+        });
+
+        // ICE connection state change listener
+        peerConnection.addEventListener('iceconnectionstatechange', () => {
+            console.log(`🧊 ICE connection state for ${deviceIp}: ${peerConnection.iceConnectionState}`);
+        });
+
+        // ICE gathering state change listener
+        peerConnection.addEventListener('icegatheringstatechange', () => {
+            console.log(`📡 ICE gathering state for ${deviceIp}: ${peerConnection.iceGatheringState}`);
+        });
+
+        // Signaling state change listener
+        peerConnection.addEventListener('signalingstatechange', () => {
+            console.log(`📶 Signaling state for ${deviceIp}: ${peerConnection.signalingState}`);
+        });
+
+        // ICE candidate handler
+        peerConnection.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
+            if (event.candidate) {
+                console.log('🧊 Sending ICE candidate to:', deviceIp, event.candidate.type);
+                emit('ice-candidate', {
+                    targetIp: deviceIp,
+                    candidate: event.candidate.toJSON()
+                });
+            } else {
+                console.log('✅ ICE gathering complete for:', deviceIp);
+            }
+        };
+    }, [emit, pushMessage]);
 
     const connectAndCreateOffer = useCallback(async (deviceIp: string) => {
         if (!isConnected) {
@@ -72,72 +151,13 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             peerConnection = new RTCPeerConnection({
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
                 ],
                 iceCandidatePoolSize: 10
             });
 
-            // Connection state change listener
-            peerConnection.addEventListener('connectionstatechange', () => {
-                console.log(`📡 Connection state for ${deviceIp}: ${peerConnection!.connectionState}`);
-                
-                switch (peerConnection!.connectionState) {
-                    case 'connected':
-                        console.log('✅ WebRTC connection established with:', deviceIp);
-                        emit('webrtc-connected', { targetIp: deviceIp });
-                        setConnectedDevices(prev => new Set(prev).add(deviceIp));
-                        pushMessage({ 
-                            message: `Connected to ${deviceIp}`, 
-                            messageType: 'success' 
-                        });
-                        break;
-                    case 'disconnected':
-                        console.log('⚠️ WebRTC connection disconnected:', deviceIp);
-                        pushMessage({ 
-                            message: `Disconnected from ${deviceIp}`, 
-                            messageType: 'error' 
-                        });
-                        break;
-                    case 'failed':
-                        console.log('❌ WebRTC connection failed:', deviceIp);
-                        setConnectedDevices(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(deviceIp);
-                            return newSet;
-                        });
-                        emit('webrtc-disconnected', { targetIp: deviceIp });
-                        pushMessage({ 
-                            message: `Connection failed with ${deviceIp}`, 
-                            messageType: 'error' 
-                        });
-                        break;
-                    case 'closed':
-                        console.log('🔒 WebRTC connection closed:', deviceIp);
-                        setConnectedDevices(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(deviceIp);
-                            return newSet;
-                        });
-                        emit('webrtc-disconnected', { targetIp: deviceIp });
-                        break;
-                }
-            });
-
-            // ICE connection state change listener
-            peerConnection.addEventListener('iceconnectionstatechange', () => {
-                console.log(`🧊 ICE connection state for ${deviceIp}: ${peerConnection!.iceConnectionState}`);
-            });
-
-            // ICE candidate handler
-            peerConnection.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
-                if (event.candidate) {
-                    console.log('🧊 Sending ICE candidate to:', deviceIp);
-                    emit('ice-candidate', {
-                        targetIp: deviceIp,
-                        candidate: event.candidate
-                    });
-                }
-            };
+            setupPeerConnectionListeners(peerConnection, deviceIp);
 
             // Update both ref and state
             const newPeerConnections = new Map(peerConnectionsRef.current);
@@ -146,21 +166,26 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             setPeerConnections(newPeerConnections);
         }
 
-        // Create offer immediately with the same peer connection instance
         try {
             console.log('📤 Creating offer for:', deviceIp);
-            const offer = await peerConnection.createOffer();
+            const offer = await peerConnection.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            });
+            
+            console.log('📝 Setting local description (offer)');
             await peerConnection.setLocalDescription(offer);
             
+            console.log('📤 Sending offer via socket');
             emit('offer', {
                 targetIp: deviceIp,
-                sdp: offer
+                sdp: peerConnection.localDescription
             });
         } catch (error) {
             console.error('❌ Error creating offer:', error);
             pushMessage({ message: 'Failed to create offer', messageType: 'error' });
         }
-    }, [isConnected, emit, pushMessage]);
+    }, [isConnected, emit, pushMessage, setupPeerConnectionListeners]);
 
     const createAnswer = useCallback(async (deviceIp: string) => {
         if (!isConnected) {
@@ -181,11 +206,14 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
         try {
             console.log('📥 Creating answer for:', deviceIp);
             const answer = await peerConnection.createAnswer();
+            
+            console.log('📝 Setting local description (answer)');
             await peerConnection.setLocalDescription(answer);
             
+            console.log('📤 Sending answer via socket');
             emit('answer', {
                 targetIp: deviceIp,
-                sdp: answer
+                sdp: peerConnection.localDescription
             });
 
             return answer;
@@ -222,52 +250,18 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             return peerConnectionsRef.current.get(deviceIp);
         }
 
-        console.log('🔌 Creating peer connection for incoming offer:', deviceIp);
+        console.log('🔌 Creating peer connection for incoming connection:', deviceIp);
 
         const peerConnection = new RTCPeerConnection({
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
             ],
             iceCandidatePoolSize: 10
         });
 
-        // Connection state change listener
-        peerConnection.addEventListener('connectionstatechange', () => {
-            console.log(`📡 Connection state for ${deviceIp}: ${peerConnection.connectionState}`);
-            
-            switch (peerConnection.connectionState) {
-                case 'connected':
-                    console.log('✅ WebRTC connection established with:', deviceIp);
-                    emit('webrtc-connected', { targetIp: deviceIp });
-                    setConnectedDevices(prev => new Set(prev).add(deviceIp));
-                    pushMessage({ 
-                        message: `Connected to ${deviceIp}`, 
-                        messageType: 'success' 
-                    });
-                    break;
-                case 'disconnected':
-                case 'failed':
-                case 'closed':
-                    setConnectedDevices(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(deviceIp);
-                        return newSet;
-                    });
-                    break;
-            }
-        });
-
-        // ICE candidate handler
-        peerConnection.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
-            if (event.candidate) {
-                console.log('🧊 Sending ICE candidate to:', deviceIp);
-                emit('ice-candidate', {
-                    targetIp: deviceIp,
-                    candidate: event.candidate
-                });
-            }
-        };
+        setupPeerConnectionListeners(peerConnection, deviceIp);
 
         // Update both ref and state
         const newPeerConnections = new Map(peerConnectionsRef.current);
@@ -276,7 +270,7 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
         setPeerConnections(newPeerConnections);
 
         return peerConnection;
-    }, [emit, pushMessage]);
+    }, [setupPeerConnectionListeners]);
 
     useEffect(() => {
         if (!isConnected) {
@@ -295,7 +289,10 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             }
 
             try {
+                console.log('📝 Setting remote description (offer)');
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                console.log('✅ Remote description set successfully');
+                
                 await createAnswer(fromDeviceIp);
             } catch (error) {
                 console.error('❌ Error handling offer:', error);
@@ -310,12 +307,15 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
 
             const peerConnection = peerConnectionsRef.current.get(fromDeviceIp);
             if (!peerConnection) {
+                console.error('❌ Peer connection not found for answer');
                 pushMessage({ message: 'Peer connection not found', messageType: 'error' });
                 return;
             }
 
             try {
+                console.log('📝 Setting remote description (answer)');
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                console.log('✅ Remote description (answer) set successfully');
             } catch (error) {
                 console.error('❌ Error handling answer:', error);
                 pushMessage({ message: 'Failed to handle answer', messageType: 'error' });
@@ -323,18 +323,30 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
         };
 
         // Handle incoming ICE candidate
-        const handleIceCandidate = async (data: { from: string; candidate: RTCIceCandidate }) => {
+        const handleIceCandidate = async (data: { from: string; candidate: RTCIceCandidateInit }) => {
             const fromDeviceIp = data.from;
-            console.log('🧊 Received ICE candidate from:', fromDeviceIp);
+            console.log('🧊 Received ICE candidate from:', fromDeviceIp, data.candidate);
 
             const peerConnection = peerConnectionsRef.current.get(fromDeviceIp);
             if (!peerConnection) {
-                pushMessage({ message: 'Peer connection not found for ICE candidate', messageType: 'error' });
+                console.error('❌ Peer connection not found for ICE candidate');
                 return;
             }
 
             try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                if (peerConnection.remoteDescription) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    console.log('✅ ICE candidate added successfully');
+                } else {
+                    console.warn('⚠️ Remote description not set yet, queuing ICE candidate');
+                    // Queue the candidate for later
+                    setTimeout(async () => {
+                        if (peerConnection.remoteDescription) {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                            console.log('✅ Queued ICE candidate added successfully');
+                        }
+                    }, 100);
+                }
             } catch (err) {
                 console.error("❌ Error adding ICE candidate:", err);
             }
@@ -348,7 +360,7 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
 
         // Handle disconnection notification
         const handleWebRTCDisconnected = (data: { fromIp: string }) => {
-            console.log(' Received disconnection notification from:', data.fromIp);
+            console.log('❌ Received disconnection notification from:', data.fromIp);
             setConnectedDevices(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(data.fromIp);
