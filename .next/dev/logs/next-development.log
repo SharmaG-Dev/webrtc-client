@@ -160,3 +160,886 @@ It can also happen if the client has a browser extension installed which messes 
                           >
                   ...
 
+[00:22:00.021] Server  LOG      ✓ Compiled in 339ms
+[00:22:00.443] Server  WARN     ⚠ Fast Refresh had to perform a full reload when ./provider/useWebRTC.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:22:04.923] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__var..."
+-                           data-new-gr-c-s-check-loaded="14.1261.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[00:22:09.645] Server  LOG      ✓ Compiled in 110ms
+[00:22:10.074] Server  WARN     ⚠ Fast Refresh had to perform a full reload when ./provider/useWebRTC.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:22:13.406] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__var..."
+-                           data-new-gr-c-s-check-loaded="14.1261.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[00:22:43.763] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.799] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.822] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.873] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.917] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.942] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.969] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:43.995] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.040] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.078] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.106] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.126] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.149] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.166] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.179] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.197] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.216] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.230] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.245] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.260] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.280] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.295] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.310] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.320] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.341] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.358] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.370] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.388] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.407] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.419] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.429] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.448] Server  ERROR    ⨯ ./app/page.tsx:22:1
+Module not found: Can't resolve '@/components/ChatBox'
+  20 | } from "lucide-react"
+  21 | import { useWebRTC } from "@/provider/useWebRTC"
+> 22 | import ChatBox from "@/components/ChatBox"
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  23 |
+  24 | export default function Home() {
+  25 |   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
+
+Import map: aliased to relative './components/ChatBox' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:22:44.466] Server  LOG      ✓ Compiled in 630ms
+[00:22:54.534] Server  LOG      ✓ Compiled in 443ms
+[00:23:03.325] Server  LOG      ✓ Compiled in 737ms

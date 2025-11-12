@@ -16,6 +16,7 @@ interface WebRtcInterface {
     message: MessageI[];
     connectedDevices: Set<string>;
     disconnectDevice: (deviceIp: string) => void;
+    dataChannels: Map<string, RTCDataChannel>;
 }
 
 export const WebRTCContext = createContext<WebRtcInterface | null>(null);
@@ -36,6 +37,8 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
     const [peerConnections, setPeerConnections] = useState<Map<string, RTCPeerConnection>>(new Map());
     const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
     const [connectedDevices, setConnectedDevices] = useState<Set<string>>(new Set());
+    const [dataChannels, setDataChannels] = useState<Map<string, RTCDataChannel>>(new Map());
+    const dataChannelsRef = useRef<Map<string, RTCDataChannel>>(new Map());
 
     const pushMessage = useCallback(({ message, messageType }: MessageI) => {
         setMessage(prev => [...prev, { message, messageType }]);
@@ -131,7 +134,43 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
                 console.log('✅ ICE gathering complete for:', deviceIp);
             }
         };
+
+        // DataChannel listener (for receiving side)
+        peerConnection.addEventListener('datachannel', (event) => {
+            console.log('📨 DataChannel received from:', deviceIp);
+            const dataChannel = event.channel;
+            
+            setupDataChannelListeners(dataChannel, deviceIp);
+            
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.set(deviceIp, dataChannel);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        });
+
     }, [emit, pushMessage]);
+
+    const setupDataChannelListeners = useCallback((dataChannel: RTCDataChannel, deviceIp: string) => {
+        dataChannel.addEventListener('open', () => {
+            console.log('✅ DataChannel opened for:', deviceIp);
+            pushMessage({
+                message: `Chat ready with ${deviceIp}`,
+                messageType: 'success'
+            });
+        });
+
+        dataChannel.addEventListener('close', () => {
+            console.log('❌ DataChannel closed for:', deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.delete(deviceIp);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        });
+
+        dataChannel.addEventListener('error', (error) => {
+            console.error('❌ DataChannel error:', error);
+        });
+    }, [pushMessage]);
 
     const connectAndCreateOffer = useCallback(async (deviceIp: string) => {
         if (!isConnected) {
@@ -159,6 +198,19 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
 
             setupPeerConnectionListeners(peerConnection, deviceIp);
 
+            // Create DataChannel (for initiating side)
+            console.log('📨 Creating DataChannel for:', deviceIp);
+            const dataChannel = peerConnection.createDataChannel('chat', {
+                ordered: true
+            });
+
+            setupDataChannelListeners(dataChannel, deviceIp);
+
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.set(deviceIp, dataChannel);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+
             // Update both ref and state
             const newPeerConnections = new Map(peerConnectionsRef.current);
             newPeerConnections.set(deviceIp, peerConnection);
@@ -185,7 +237,7 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             console.error('❌ Error creating offer:', error);
             pushMessage({ message: 'Failed to create offer', messageType: 'error' });
         }
-    }, [isConnected, emit, pushMessage, setupPeerConnectionListeners]);
+    }, [isConnected, emit, pushMessage, setupPeerConnectionListeners, setupDataChannelListeners]);
 
     const createAnswer = useCallback(async (deviceIp: string) => {
         if (!isConnected) {
@@ -225,7 +277,18 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
 
     const disconnectDevice = useCallback((deviceIp: string) => {
         const peerConnection = peerConnectionsRef.current.get(deviceIp);
+        const dataChannel = dataChannelsRef.current.get(deviceIp);
         
+        if (dataChannel) {
+            console.log('📨 Closing DataChannel for:', deviceIp);
+            dataChannel.close();
+            
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.delete(deviceIp);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        }
+
         if (peerConnection) {
             console.log('🔌 Closing peer connection for:', deviceIp);
             peerConnection.close();
@@ -392,7 +455,8 @@ export const WebRtcProvider = ({ children }: { children: ReactNode }) => {
             pushMessage, 
             message,
             connectedDevices,
-            disconnectDevice
+            disconnectDevice,
+            dataChannels
         }}>
             {children}
         </WebRTCContext.Provider>

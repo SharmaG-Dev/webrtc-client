@@ -19,6 +19,8 @@ import {
   AlertCircle
 } from "lucide-react"
 import { useWebRTC } from "@/provider/useWebRTC"
+import ChatBox from "@/components/chatBox"
+
 
 export default function Home() {
   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
@@ -26,14 +28,25 @@ export default function Home() {
   const [deviceConnected, setDeviceConnected] = useState<boolean | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
   const [devices, setDevices] = useState<DeviceData[]>([])
+  const [activeChatDevices, setActiveChatDevices] = useState<Set<string>>(new Set())
 
   const {
     connectAndCreateOffer,
     message,
     connectedDevices,
     disconnectDevice,
-    removeMessage
+    removeMessage,
+    dataChannels
   } = useWebRTC();
+
+  // Auto-show chat when connected
+  useEffect(() => {
+    connectedDevices.forEach(deviceIp => {
+      if (!activeChatDevices.has(deviceIp)) {
+        setActiveChatDevices(prev => new Set(prev).add(deviceIp));
+      }
+    });
+  }, [connectedDevices, activeChatDevices]);
 
   // Check device connection status
   const checkConnection = useCallback(() => {
@@ -117,6 +130,13 @@ export default function Home() {
 
     console.log('🔌 Disconnecting from device:', deviceIp)
     disconnectDevice(deviceIp)
+    
+    // Remove from active chat devices
+    setActiveChatDevices(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(deviceIp);
+      return newSet;
+    });
   }, [disconnectDevice])
 
   const handleClearData = () => {
@@ -328,11 +348,12 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {devices?.map((item, index) => {
                 const isConnected = connectedDevices.has(item?.deviceInfo?.deviceIp);
+                const isChatActive = activeChatDevices.has(item?.deviceInfo?.deviceIp);
                 
                 return (
                   <div
                     key={index}
-                    className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                    className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
                   >
                     <div className={`p-4 ${
                       isConnected
@@ -392,6 +413,23 @@ export default function Home() {
                               <span className="text-green-700 font-medium text-sm">Connected via WebRTC</span>
                             </div>
                           </div>
+                          
+                          {/* Chat Box */}
+                          {isChatActive && (
+                            <ChatBox
+                              deviceName={item?.deviceInfo?.name || 'Unknown Device'}
+                              deviceIp={item?.deviceInfo?.deviceIp}
+                              dataChannel={dataChannels.get(item?.deviceInfo?.deviceIp) || null}
+                              onClose={() => {
+                                setActiveChatDevices(prev => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(item?.deviceInfo?.deviceIp);
+                                  return newSet;
+                                });
+                              }}
+                            />
+                          )}
+                          
                           <button
                             onClick={() => handleDisconnectDevice(item)}
                             className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md flex items-center justify-center space-x-2"

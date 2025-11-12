@@ -200,6 +200,8 @@ const WebRtcProvider = ({ children })=>{
     const [peerConnections, setPeerConnections] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Map());
     const peerConnectionsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(new Map());
     const [connectedDevices, setConnectedDevices] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Set());
+    const [dataChannels, setDataChannels] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Map());
+    const dataChannelsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(new Map());
     const pushMessage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(({ message, messageType })=>{
         setMessage((prev)=>[
                 ...prev,
@@ -299,8 +301,39 @@ const WebRtcProvider = ({ children })=>{
                 console.log('✅ ICE gathering complete for:', deviceIp);
             }
         };
+        // DataChannel listener (for receiving side)
+        peerConnection.addEventListener('datachannel', (event)=>{
+            console.log('📨 DataChannel received from:', deviceIp);
+            const dataChannel = event.channel;
+            setupDataChannelListeners(dataChannel, deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.set(deviceIp, dataChannel);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        });
     }, [
         emit,
+        pushMessage
+    ]);
+    const setupDataChannelListeners = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((dataChannel, deviceIp)=>{
+        dataChannel.addEventListener('open', ()=>{
+            console.log('✅ DataChannel opened for:', deviceIp);
+            pushMessage({
+                message: `Chat ready with ${deviceIp}`,
+                messageType: 'success'
+            });
+        });
+        dataChannel.addEventListener('close', ()=>{
+            console.log('❌ DataChannel closed for:', deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.delete(deviceIp);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        });
+        dataChannel.addEventListener('error', (error)=>{
+            console.error('❌ DataChannel error:', error);
+        });
+    }, [
         pushMessage
     ]);
     const connectAndCreateOffer = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (deviceIp)=>{
@@ -336,6 +369,16 @@ const WebRtcProvider = ({ children })=>{
                 iceCandidatePoolSize: 10
             });
             setupPeerConnectionListeners(peerConnection, deviceIp);
+            // Create DataChannel (for initiating side)
+            console.log('📨 Creating DataChannel for:', deviceIp);
+            const dataChannel = peerConnection.createDataChannel('chat', {
+                ordered: true
+            });
+            setupDataChannelListeners(dataChannel, deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.set(deviceIp, dataChannel);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
             // Update both ref and state
             const newPeerConnections = new Map(peerConnectionsRef.current);
             newPeerConnections.set(deviceIp, peerConnection);
@@ -366,7 +409,8 @@ const WebRtcProvider = ({ children })=>{
         isConnected,
         emit,
         pushMessage,
-        setupPeerConnectionListeners
+        setupPeerConnectionListeners,
+        setupDataChannelListeners
     ]);
     const createAnswer = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (deviceIp)=>{
         if (!isConnected) {
@@ -416,6 +460,15 @@ const WebRtcProvider = ({ children })=>{
     ]);
     const disconnectDevice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((deviceIp)=>{
         const peerConnection = peerConnectionsRef.current.get(deviceIp);
+        const dataChannel = dataChannelsRef.current.get(deviceIp);
+        if (dataChannel) {
+            console.log('📨 Closing DataChannel for:', deviceIp);
+            dataChannel.close();
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.delete(deviceIp);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        }
         if (peerConnection) {
             console.log('🔌 Closing peer connection for:', deviceIp);
             peerConnection.close();
@@ -588,12 +641,13 @@ const WebRtcProvider = ({ children })=>{
             pushMessage,
             message,
             connectedDevices,
-            disconnectDevice
+            disconnectDevice,
+            dataChannels
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/provider/useWebRTC.tsx",
-        lineNumber: 387,
+        lineNumber: 450,
         columnNumber: 9
     }, ("TURBOPACK compile-time value", void 0));
 };
