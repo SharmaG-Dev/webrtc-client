@@ -170,467 +170,8 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
-"[project]/hooks/useWebRTC.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
-"use strict";
+"[project]/hooks/useWebRTC.ts [app-client] (ecmascript)", ((__turbopack_context__, module, exports) => {
 
-__turbopack_context__.s([
-    "useWebRTC",
-    ()=>useWebRTC
-]);
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
-var _s = __turbopack_context__.k.signature();
-'use client';
-;
-function useWebRTC({ emit, on, isSocketConnected }) {
-    _s();
-    const peerConnectionsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(new Map());
-    const dataChannelsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(new Map());
-    const negotiatingRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(new Set());
-    // ✅ Store pending ICE candidates
-    const pendingCandidatesRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(new Map());
-    const [connectionStatuses, setConnectionStatuses] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(new Map());
-    const [receivedMessages, setReceivedMessages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
-    const iceServers = {
-        iceServers: [
-            {
-                urls: 'stun:stun.l.google.com:19302'
-            },
-            {
-                urls: 'stun:stun1.l.google.com:19302'
-            }
-        ],
-        iceCandidatePoolSize: 10
-    };
-    const updateConnectionStatus = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[updateConnectionStatus]": (deviceIp, status)=>{
-            console.log(`📊 Status update for ${deviceIp}:`, status);
-            setConnectionStatuses({
-                "useWebRTC.useCallback[updateConnectionStatus]": (prev)=>{
-                    const newMap = new Map(prev);
-                    newMap.set(deviceIp, {
-                        deviceIp,
-                        status
-                    });
-                    return newMap;
-                }
-            }["useWebRTC.useCallback[updateConnectionStatus]"]);
-        }
-    }["useWebRTC.useCallback[updateConnectionStatus]"], []);
-    const cleanupPeerConnection = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[cleanupPeerConnection]": (deviceIp)=>{
-            const pc = peerConnectionsRef.current.get(deviceIp);
-            const dc = dataChannelsRef.current.get(deviceIp);
-            if (dc) {
-                dc.close();
-                dataChannelsRef.current.delete(deviceIp);
-            }
-            if (pc) {
-                pc.close();
-                peerConnectionsRef.current.delete(deviceIp);
-            }
-            negotiatingRef.current.delete(deviceIp);
-            pendingCandidatesRef.current.delete(deviceIp); // ✅ Clear pending candidates
-            updateConnectionStatus(deviceIp, 'disconnected');
-            console.log(`🧹 Cleaned up ${deviceIp}`);
-        }
-    }["useWebRTC.useCallback[cleanupPeerConnection]"], [
-        updateConnectionStatus
-    ]);
-    // ✅ FIXED: Handle negotiation properly
-    const handleNegotiationNeeded = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[handleNegotiationNeeded]": async (deviceIp, peerConnection)=>{
-            if (negotiatingRef.current.has(deviceIp)) {
-                console.log(`⏳ Already negotiating for ${deviceIp}, skipping...`);
-                return;
-            }
-            // ✅ Check signaling state
-            if (peerConnection.signalingState !== 'stable') {
-                console.log(`⚠️ Signaling state not stable for ${deviceIp}: ${peerConnection.signalingState}`);
-                return;
-            }
-            negotiatingRef.current.add(deviceIp);
-            console.log(`🔄 Negotiation needed for ${deviceIp}`);
-            try {
-                console.log(`📝 Creating offer for ${deviceIp}`);
-                const offer = await peerConnection.createOffer();
-                console.log(`📝 Setting local description for ${deviceIp}`);
-                await peerConnection.setLocalDescription(offer);
-                console.log(`📤 Sending offer to ${deviceIp}`);
-                emit('offer', {
-                    targetIp: deviceIp,
-                    sdp: peerConnection.localDescription
-                });
-                console.log(`✅ Offer sent for ${deviceIp}`);
-            } catch (error) {
-                console.error(`❌ Negotiation error for ${deviceIp}:`, error);
-                updateConnectionStatus(deviceIp, 'failed');
-            } finally{
-                // ✅ Remove negotiating flag after a delay
-                setTimeout({
-                    "useWebRTC.useCallback[handleNegotiationNeeded]": ()=>{
-                        negotiatingRef.current.delete(deviceIp);
-                    }
-                }["useWebRTC.useCallback[handleNegotiationNeeded]"], 1000);
-            }
-        }
-    }["useWebRTC.useCallback[handleNegotiationNeeded]"], [
-        emit,
-        updateConnectionStatus
-    ]);
-    const connectToDevice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[connectToDevice]": async (device)=>{
-            const targetIp = device?.deviceInfo?.deviceIp;
-            if (!targetIp) {
-                console.error('❌ No device IP found');
-                throw new Error('No device IP found');
-            }
-            updateConnectionStatus(targetIp, 'connecting');
-            if (peerConnectionsRef.current.has(targetIp)) {
-                cleanupPeerConnection(targetIp);
-                await new Promise({
-                    "useWebRTC.useCallback[connectToDevice]": (resolve)=>setTimeout(resolve, 500)
-                }["useWebRTC.useCallback[connectToDevice]"]);
-            }
-            const peerConnection = new RTCPeerConnection(iceServers);
-            peerConnectionsRef.current.set(targetIp, peerConnection);
-            // ✅ Create data channel
-            const dataChannel = peerConnection.createDataChannel('fileChannel', {
-                ordered: true,
-                maxRetransmits: 10
-            });
-            dataChannelsRef.current.set(targetIp, dataChannel);
-            // ✅ FIXED: Only handle negotiation when needed
-            peerConnection.onnegotiationneeded = ({
-                "useWebRTC.useCallback[connectToDevice]": async ()=>{
-                    console.log(`🔄 negotiationneeded event for ${targetIp}`);
-                    await handleNegotiationNeeded(targetIp, peerConnection);
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-            dataChannel.onopen = ({
-                "useWebRTC.useCallback[connectToDevice]": ()=>{
-                    console.log(`✅ Data channel opened for ${targetIp}`);
-                    updateConnectionStatus(targetIp, 'connected');
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-            dataChannel.onclose = ({
-                "useWebRTC.useCallback[connectToDevice]": ()=>{
-                    console.log(`🔴 Data channel closed for ${targetIp}`);
-                    updateConnectionStatus(targetIp, 'disconnected');
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-            dataChannel.onmessage = ({
-                "useWebRTC.useCallback[connectToDevice]": (event)=>{
-                    console.log(`📦 Message from ${targetIp}:`, event.data);
-                    try {
-                        const parsed = JSON.parse(event.data);
-                        if (parsed.type === 'message') {
-                            setReceivedMessages({
-                                "useWebRTC.useCallback[connectToDevice]": (prev)=>[
-                                        ...prev,
-                                        {
-                                            from: targetIp,
-                                            message: parsed.content,
-                                            timestamp: Date.now()
-                                        }
-                                    ]
-                            }["useWebRTC.useCallback[connectToDevice]"]);
-                        }
-                    } catch  {}
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-            dataChannel.onerror = ({
-                "useWebRTC.useCallback[connectToDevice]": (error)=>{
-                    console.error(`❌ Channel error for ${targetIp}:`, error);
-                    updateConnectionStatus(targetIp, 'failed');
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-            peerConnection.onicecandidate = ({
-                "useWebRTC.useCallback[connectToDevice]": (event)=>{
-                    if (event.candidate) {
-                        console.log(`🌐 ICE candidate for ${targetIp}`);
-                        emit('ice-candidate', {
-                            targetIp,
-                            candidate: event.candidate
-                        });
-                    }
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-            peerConnection.oniceconnectionstatechange = ({
-                "useWebRTC.useCallback[connectToDevice]": ()=>{
-                    const state = peerConnection.iceConnectionState;
-                    console.log(`🔄 ICE state for ${targetIp}:`, state);
-                    if (state === 'connected' || state === 'completed') {
-                        updateConnectionStatus(targetIp, 'connected');
-                    } else if (state === 'failed' || state === 'disconnected') {
-                        updateConnectionStatus(targetIp, 'disconnected');
-                    }
-                }
-            })["useWebRTC.useCallback[connectToDevice]"];
-        // ✅ REMOVED: Don't manually trigger negotiation - let onnegotiationneeded handle it
-        // The data channel creation will automatically trigger negotiationneeded
-        }
-    }["useWebRTC.useCallback[connectToDevice]"], [
-        emit,
-        updateConnectionStatus,
-        cleanupPeerConnection,
-        handleNegotiationNeeded,
-        iceServers
-    ]);
-    const sendMessage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[sendMessage]": (deviceIp, message)=>{
-            const dataChannel = dataChannelsRef.current.get(deviceIp);
-            if (!dataChannel || dataChannel.readyState !== 'open') {
-                console.error(`❌ Channel not open for ${deviceIp}`);
-                return false;
-            }
-            dataChannel.send(JSON.stringify({
-                type: 'message',
-                content: message
-            }));
-            return true;
-        }
-    }["useWebRTC.useCallback[sendMessage]"], []);
-    const disconnectFromDevice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[disconnectFromDevice]": (deviceIp)=>{
-            cleanupPeerConnection(deviceIp);
-        }
-    }["useWebRTC.useCallback[disconnectFromDevice]"], [
-        cleanupPeerConnection
-    ]);
-    const isDeviceConnected = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "useWebRTC.useCallback[isDeviceConnected]": (deviceIp)=>{
-            const status = connectionStatuses.get(deviceIp);
-            return status?.status === 'connected';
-        }
-    }["useWebRTC.useCallback[isDeviceConnected]"], [
-        connectionStatuses
-    ]);
-    // ✅ FIXED: Handle incoming offers
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "useWebRTC.useEffect": ()=>{
-            if (!isSocketConnected) return;
-            const unsubscribeOffer = on('offer', {
-                "useWebRTC.useEffect.unsubscribeOffer": async ({ from, sdp })=>{
-                    console.log(`📨 Offer received from ${from}`);
-                    updateConnectionStatus(from, 'connecting');
-                    if (peerConnectionsRef.current.has(from)) {
-                        cleanupPeerConnection(from);
-                        await new Promise({
-                            "useWebRTC.useEffect.unsubscribeOffer": (resolve)=>setTimeout(resolve, 500)
-                        }["useWebRTC.useEffect.unsubscribeOffer"]);
-                    }
-                    const peerConnection = new RTCPeerConnection(iceServers);
-                    peerConnectionsRef.current.set(from, peerConnection);
-                    peerConnection.ondatachannel = ({
-                        "useWebRTC.useEffect.unsubscribeOffer": (event)=>{
-                            const channel = event.channel;
-                            dataChannelsRef.current.set(from, channel);
-                            channel.onopen = ({
-                                "useWebRTC.useEffect.unsubscribeOffer": ()=>{
-                                    console.log(`✅ Channel opened (receiver) from ${from}`);
-                                    updateConnectionStatus(from, 'connected');
-                                }
-                            })["useWebRTC.useEffect.unsubscribeOffer"];
-                            channel.onmessage = ({
-                                "useWebRTC.useEffect.unsubscribeOffer": (e)=>{
-                                    console.log(`📥 Message from ${from}:`, e.data);
-                                    try {
-                                        const parsed = JSON.parse(e.data);
-                                        if (parsed.type === 'message') {
-                                            setReceivedMessages({
-                                                "useWebRTC.useEffect.unsubscribeOffer": (prev)=>[
-                                                        ...prev,
-                                                        {
-                                                            from,
-                                                            message: parsed.content,
-                                                            timestamp: Date.now()
-                                                        }
-                                                    ]
-                                            }["useWebRTC.useEffect.unsubscribeOffer"]);
-                                        }
-                                    } catch  {}
-                                }
-                            })["useWebRTC.useEffect.unsubscribeOffer"];
-                            channel.onerror = ({
-                                "useWebRTC.useEffect.unsubscribeOffer": (error)=>{
-                                    console.error(`❌ Channel error:`, error);
-                                    updateConnectionStatus(from, 'failed');
-                                }
-                            })["useWebRTC.useEffect.unsubscribeOffer"];
-                        }
-                    })["useWebRTC.useEffect.unsubscribeOffer"];
-                    peerConnection.onicecandidate = ({
-                        "useWebRTC.useEffect.unsubscribeOffer": (event)=>{
-                            if (event.candidate) {
-                                emit('ice-candidate', {
-                                    targetIp: from,
-                                    candidate: event.candidate
-                                });
-                            }
-                        }
-                    })["useWebRTC.useEffect.unsubscribeOffer"];
-                    peerConnection.oniceconnectionstatechange = ({
-                        "useWebRTC.useEffect.unsubscribeOffer": ()=>{
-                            const state = peerConnection.iceConnectionState;
-                            console.log(`🔄 ICE state (receiver) ${from}:`, state);
-                            if (state === 'connected' || state === 'completed') {
-                                updateConnectionStatus(from, 'connected');
-                            } else if (state === 'failed' || state === 'disconnected') {
-                                updateConnectionStatus(from, 'disconnected');
-                            }
-                        }
-                    })["useWebRTC.useEffect.unsubscribeOffer"];
-                    try {
-                        console.log(`📝 Setting remote (offer) for ${from}`);
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-                        console.log(`✅ Remote set for ${from}`);
-                        // ✅ Process pending ICE candidates after setting remote description
-                        const pending = pendingCandidatesRef.current.get(from) || [];
-                        for (const candidate of pending){
-                            try {
-                                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                                console.log(`✅ Added pending ICE candidate for ${from}`);
-                            } catch (error) {
-                                console.error(`❌ Error adding pending candidate:`, error);
-                            }
-                        }
-                        pendingCandidatesRef.current.delete(from);
-                        console.log(`📝 Creating answer for ${from}`);
-                        const answer = await peerConnection.createAnswer();
-                        console.log(`✅ Answer created for ${from}`);
-                        console.log(`📝 Setting local (answer) for ${from}`);
-                        await peerConnection.setLocalDescription(answer);
-                        console.log(`✅ Local set for ${from}`);
-                        console.log(`📤 Sending answer to ${from}`);
-                        emit('answer', {
-                            targetIp: from,
-                            sdp: peerConnection.localDescription
-                        });
-                        console.log(`✅ Answer sent to ${from}`);
-                    } catch (error) {
-                        console.error(`❌ Offer handling error for ${from}:`, error);
-                        updateConnectionStatus(from, 'failed');
-                        cleanupPeerConnection(from);
-                    }
-                }
-            }["useWebRTC.useEffect.unsubscribeOffer"]);
-            return ({
-                "useWebRTC.useEffect": ()=>unsubscribeOffer()
-            })["useWebRTC.useEffect"];
-        }
-    }["useWebRTC.useEffect"], [
-        isSocketConnected,
-        emit,
-        on,
-        cleanupPeerConnection,
-        updateConnectionStatus,
-        iceServers
-    ]);
-    // ✅ Handle answers
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "useWebRTC.useEffect": ()=>{
-            if (!isSocketConnected) return;
-            const unsubscribeAnswer = on('answer', {
-                "useWebRTC.useEffect.unsubscribeAnswer": async ({ from, sdp })=>{
-                    console.log(`💬 Answer received from ${from}`);
-                    const peerConnection = peerConnectionsRef.current.get(from);
-                    if (!peerConnection) {
-                        console.error(`❌ No PC found for ${from}`);
-                        return;
-                    }
-                    try {
-                        console.log(`📝 Setting remote (answer) for ${from}`);
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-                        console.log(`✅ Answer remote set for ${from}`);
-                        // ✅ Process pending ICE candidates after setting remote description
-                        const pending = pendingCandidatesRef.current.get(from) || [];
-                        for (const candidate of pending){
-                            try {
-                                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                                console.log(`✅ Added pending ICE candidate for ${from}`);
-                            } catch (error) {
-                                console.error(`❌ Error adding pending candidate:`, error);
-                            }
-                        }
-                        pendingCandidatesRef.current.delete(from);
-                    } catch (error) {
-                        console.error(`❌ Answer error for ${from}:`, error);
-                        updateConnectionStatus(from, 'failed');
-                    }
-                }
-            }["useWebRTC.useEffect.unsubscribeAnswer"]);
-            return ({
-                "useWebRTC.useEffect": ()=>unsubscribeAnswer()
-            })["useWebRTC.useEffect"];
-        }
-    }["useWebRTC.useEffect"], [
-        isSocketConnected,
-        on,
-        updateConnectionStatus
-    ]);
-    // ✅ FIXED: Handle ICE candidates with pending queue
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "useWebRTC.useEffect": ()=>{
-            if (!isSocketConnected) return;
-            const unsubscribeICE = on('ice-candidate', {
-                "useWebRTC.useEffect.unsubscribeICE": async ({ from, candidate })=>{
-                    if (!candidate) return;
-                    const peerConnection = peerConnectionsRef.current.get(from);
-                    if (!peerConnection) {
-                        console.log(`⚠️ No peer connection for ${from}, ignoring candidate`);
-                        return;
-                    }
-                    try {
-                        // ✅ Check if remote description is set
-                        if (peerConnection.remoteDescription) {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                            console.log(`✅ ICE candidate added for ${from}`);
-                        } else {
-                            // ✅ Queue candidate if remote description not set yet
-                            console.log(`⏳ Queueing ICE candidate for ${from} (no remote description yet)`);
-                            const pending = pendingCandidatesRef.current.get(from) || [];
-                            pending.push(candidate);
-                            pendingCandidatesRef.current.set(from, pending);
-                        }
-                    } catch (error) {
-                        console.error(`❌ ICE error for ${from}:`, error);
-                    }
-                }
-            }["useWebRTC.useEffect.unsubscribeICE"]);
-            return ({
-                "useWebRTC.useEffect": ()=>unsubscribeICE()
-            })["useWebRTC.useEffect"];
-        }
-    }["useWebRTC.useEffect"], [
-        isSocketConnected,
-        on
-    ]);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "useWebRTC.useEffect": ()=>{
-            return ({
-                "useWebRTC.useEffect": ()=>{
-                    peerConnectionsRef.current.forEach({
-                        "useWebRTC.useEffect": (_, deviceIp)=>{
-                            cleanupPeerConnection(deviceIp);
-                        }
-                    }["useWebRTC.useEffect"]);
-                }
-            })["useWebRTC.useEffect"];
-        }
-    }["useWebRTC.useEffect"], [
-        cleanupPeerConnection
-    ]);
-    return {
-        connectToDevice,
-        disconnectFromDevice,
-        sendMessage,
-        isDeviceConnected,
-        connectionStatuses,
-        receivedMessages,
-        clearMessages: ()=>setReceivedMessages([])
-    };
-}
-_s(useWebRTC, "JoUASvNnr8S1MeNSyTHCD9nztXI=");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
@@ -815,6 +356,9 @@ function Home() {
         messageInput,
         sendMessage
     ]);
+    const handleClearData = ()=>{
+        emit('clear');
+    };
     if (loading) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center",
@@ -827,7 +371,7 @@ function Home() {
                             className: "h-8 w-8 text-blue-600 animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 148,
+                            lineNumber: 152,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -835,23 +379,23 @@ function Home() {
                             children: "Loading device info..."
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 149,
+                            lineNumber: 153,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 147,
+                    lineNumber: 151,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/page.tsx",
-                lineNumber: 146,
+                lineNumber: 150,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/page.tsx",
-            lineNumber: 145,
+            lineNumber: 149,
             columnNumber: 7
         }, this);
     }
@@ -872,7 +416,7 @@ function Home() {
                                         children: "Device Connection Manager"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 163,
+                                        lineNumber: 167,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -880,13 +424,13 @@ function Home() {
                                         children: "Monitor and control your WebRTC device connections"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 166,
+                                        lineNumber: 170,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 162,
+                                lineNumber: 166,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -898,14 +442,14 @@ function Home() {
                                             className: "w-5 h-5"
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 181,
+                                            lineNumber: 185,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             children: "Disconnect"
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 182,
+                                            lineNumber: 186,
                                             columnNumber: 19
                                         }, this)
                                     ]
@@ -915,32 +459,32 @@ function Home() {
                                             className: "w-5 h-5"
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 186,
+                                            lineNumber: 190,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             children: "Connect"
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 187,
+                                            lineNumber: 191,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true)
                             }, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 171,
+                                lineNumber: 175,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 161,
+                        lineNumber: 165,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 160,
+                    lineNumber: 164,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -955,7 +499,7 @@ function Home() {
                                         className: `w-3 h-3 rounded-full ${isSocketConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 198,
+                                        lineNumber: 202,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -966,7 +510,7 @@ function Home() {
                                                 children: "Socket Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 200,
+                                                lineNumber: 204,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -977,14 +521,14 @@ function Home() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 204,
+                                                            lineNumber: 208,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Connected"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 205,
+                                                            lineNumber: 209,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
@@ -994,38 +538,38 @@ function Home() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 209,
+                                                            lineNumber: 213,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Disconnected"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 210,
+                                                            lineNumber: 214,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 201,
+                                                lineNumber: 205,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 199,
+                                        lineNumber: 203,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 197,
+                                lineNumber: 201,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 196,
+                            lineNumber: 200,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1037,7 +581,7 @@ function Home() {
                                         className: `w-3 h-3 rounded-full ${deviceConnected === null ? 'bg-yellow-500' : deviceConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 220,
+                                        lineNumber: 224,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1048,7 +592,7 @@ function Home() {
                                                 children: "Device Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 224,
+                                                lineNumber: 228,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1059,14 +603,14 @@ function Home() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 230,
+                                                            lineNumber: 234,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Checking..."
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 231,
+                                                            lineNumber: 235,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
@@ -1076,14 +620,14 @@ function Home() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 235,
+                                                            lineNumber: 239,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Registered"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 236,
+                                                            lineNumber: 240,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
@@ -1093,38 +637,38 @@ function Home() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 240,
+                                                            lineNumber: 244,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Not Registered"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 241,
+                                                            lineNumber: 245,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 225,
+                                                lineNumber: 229,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 223,
+                                        lineNumber: 227,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 219,
+                                lineNumber: 223,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 218,
+                            lineNumber: 222,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1136,7 +680,7 @@ function Home() {
                                         className: `w-3 h-3 rounded-full ${connectionStatuses.size > 0 ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 251,
+                                        lineNumber: 255,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1147,7 +691,15 @@ function Home() {
                                                 children: "Active WebRTC"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 253,
+                                                lineNumber: 257,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: handleClearData,
+                                                children: "Clear All"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/page.tsx",
+                                                lineNumber: 258,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1158,30 +710,30 @@ function Home() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 254,
+                                                lineNumber: 259,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 252,
+                                        lineNumber: 256,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 250,
+                                lineNumber: 254,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 249,
+                            lineNumber: 253,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 195,
+                    lineNumber: 199,
                     columnNumber: 9
                 }, this),
                 receivedMessages.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1194,7 +746,7 @@ function Home() {
                                     className: "w-5 h-5 text-blue-600"
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 266,
+                                    lineNumber: 271,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -1202,13 +754,13 @@ function Home() {
                                     children: "Received Messages"
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 267,
+                                    lineNumber: 272,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 265,
+                            lineNumber: 270,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1224,7 +776,7 @@ function Home() {
                                                     children: msg.from
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 273,
+                                                    lineNumber: 278,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1232,13 +784,13 @@ function Home() {
                                                     children: new Date(msg.timestamp).toLocaleTimeString()
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 274,
+                                                    lineNumber: 279,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 272,
+                                            lineNumber: 277,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1246,24 +798,24 @@ function Home() {
                                             children: msg.message
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 276,
+                                            lineNumber: 281,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, idx, true, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 271,
+                                    lineNumber: 276,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 269,
+                            lineNumber: 274,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 264,
+                    lineNumber: 269,
                     columnNumber: 11
                 }, this),
                 isRegistering && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1273,7 +825,7 @@ function Home() {
                             className: "h-5 w-5 text-blue-600 animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 285,
+                            lineNumber: 290,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1281,13 +833,13 @@ function Home() {
                             children: "Registering device..."
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 286,
+                            lineNumber: 291,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 284,
+                    lineNumber: 289,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1305,33 +857,33 @@ function Home() {
                                                 className: "w-5 h-5"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 294,
+                                                lineNumber: 299,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "My Device Information"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 295,
+                                                lineNumber: 300,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 293,
+                                        lineNumber: 298,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__["ChevronDown"], {
                                         className: "w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 297,
+                                        lineNumber: 302,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 292,
+                                lineNumber: 297,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1341,23 +893,23 @@ function Home() {
                                     children: JSON.stringify(deviceInfo, null, 2)
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 300,
+                                    lineNumber: 305,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 299,
+                                lineNumber: 304,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 291,
+                        lineNumber: 296,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 290,
+                    lineNumber: 295,
                     columnNumber: 9
                 }, this),
                 devices.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1370,7 +922,7 @@ function Home() {
                                     children: "Available Devices"
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 311,
+                                    lineNumber: 316,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1383,13 +935,13 @@ function Home() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 312,
+                                    lineNumber: 317,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 310,
+                            lineNumber: 315,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1413,21 +965,21 @@ function Home() {
                                                                 className: "w-6 h-6 text-white"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/page.tsx",
-                                                                lineNumber: 335,
+                                                                lineNumber: 340,
                                                                 columnNumber: 73
                                                             }, this),
                                                             item?.deviceInfo?.deviceType === 'PC' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$monitor$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Monitor$3e$__["Monitor"], {
                                                                 className: "w-6 h-6 text-white"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/page.tsx",
-                                                                lineNumber: 336,
+                                                                lineNumber: 341,
                                                                 columnNumber: 69
                                                             }, this),
                                                             item?.deviceInfo?.deviceType === 'Web' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$earth$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Globe2$3e$__["Globe2"], {
                                                                 className: "w-6 h-6 text-white"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/page.tsx",
-                                                                lineNumber: 337,
+                                                                lineNumber: 342,
                                                                 columnNumber: 70
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1437,7 +989,7 @@ function Home() {
                                                                         children: item?.deviceInfo?.name || 'Unknown Device'
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/page.tsx",
-                                                                        lineNumber: 340,
+                                                                        lineNumber: 345,
                                                                         columnNumber: 29
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1445,37 +997,37 @@ function Home() {
                                                                         children: item?.deviceInfo?.deviceType || 'Unknown Type'
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/page.tsx",
-                                                                        lineNumber: 343,
+                                                                        lineNumber: 348,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/page.tsx",
-                                                                lineNumber: 339,
+                                                                lineNumber: 344,
                                                                 columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/page.tsx",
-                                                        lineNumber: 334,
+                                                        lineNumber: 339,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: `w-3 h-3 rounded-full ${isWebRTCConnected ? 'bg-white' : 'bg-green-400'} animate-pulse`
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/page.tsx",
-                                                        lineNumber: 349,
+                                                        lineNumber: 354,
                                                         columnNumber: 25
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 333,
+                                                lineNumber: 338,
                                                 columnNumber: 23
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 328,
+                                            lineNumber: 333,
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1488,7 +1040,7 @@ function Home() {
                                                             className: "w-4 h-4 text-gray-400"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 357,
+                                                            lineNumber: 362,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1499,7 +1051,7 @@ function Home() {
                                                                     children: "Model"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/page.tsx",
-                                                                    lineNumber: 359,
+                                                                    lineNumber: 364,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1507,19 +1059,19 @@ function Home() {
                                                                     children: item?.deviceInfo?.deviceModel || 'N/A'
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/page.tsx",
-                                                                    lineNumber: 360,
+                                                                    lineNumber: 365,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 358,
+                                                            lineNumber: 363,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 356,
+                                                    lineNumber: 361,
                                                     columnNumber: 23
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1529,7 +1081,7 @@ function Home() {
                                                             className: "w-4 h-4 text-gray-400"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 367,
+                                                            lineNumber: 372,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1540,7 +1092,7 @@ function Home() {
                                                                     children: "IP Address"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/page.tsx",
-                                                                    lineNumber: 369,
+                                                                    lineNumber: 374,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1548,19 +1100,19 @@ function Home() {
                                                                     children: deviceIp || 'Not Available'
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/page.tsx",
-                                                                    lineNumber: 370,
+                                                                    lineNumber: 375,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 368,
+                                                            lineNumber: 373,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 366,
+                                                    lineNumber: 371,
                                                     columnNumber: 23
                                                 }, this),
                                                 connectionStatus && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1570,21 +1122,21 @@ function Home() {
                                                             className: "w-4 h-4 text-green-600"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 382,
+                                                            lineNumber: 387,
                                                             columnNumber: 71
                                                         }, this),
                                                         connectionStatus.status === 'connecting' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
                                                             className: "w-4 h-4 text-yellow-600 animate-spin"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 383,
+                                                            lineNumber: 388,
                                                             columnNumber: 72
                                                         }, this),
                                                         connectionStatus.status === 'failed' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$x$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__XCircle$3e$__["XCircle"], {
                                                             className: "w-4 h-4 text-red-600"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 384,
+                                                            lineNumber: 389,
                                                             columnNumber: 68
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1592,13 +1144,13 @@ function Home() {
                                                             children: connectionStatus.status
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 385,
+                                                            lineNumber: 390,
                                                             columnNumber: 27
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 377,
+                                                    lineNumber: 382,
                                                     columnNumber: 25
                                                 }, this),
                                                 isWebRTCConnected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1618,7 +1170,7 @@ function Home() {
                                                                 className: "flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/page.tsx",
-                                                                lineNumber: 395,
+                                                                lineNumber: 400,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1628,30 +1180,30 @@ function Home() {
                                                                     className: "w-4 h-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/page.tsx",
-                                                                    lineNumber: 407,
+                                                                    lineNumber: 412,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/page.tsx",
-                                                                lineNumber: 403,
+                                                                lineNumber: 408,
                                                                 columnNumber: 29
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/page.tsx",
-                                                        lineNumber: 394,
+                                                        lineNumber: 399,
                                                         columnNumber: 27
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 393,
+                                                    lineNumber: 398,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     className: "border-t border-gray-200 my-3"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 413,
+                                                    lineNumber: 418,
                                                     columnNumber: 23
                                                 }, this),
                                                 isWebRTCConnected ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1662,20 +1214,20 @@ function Home() {
                                                             className: "w-4 h-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 420,
+                                                            lineNumber: 425,
                                                             columnNumber: 27
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Disconnect"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 421,
+                                                            lineNumber: 426,
                                                             columnNumber: 27
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 416,
+                                                    lineNumber: 421,
                                                     columnNumber: 25
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                     onClick: ()=>handleConnectDevice(item),
@@ -1685,38 +1237,38 @@ function Home() {
                                                             className: "w-4 h-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 428,
+                                                            lineNumber: 433,
                                                             columnNumber: 27
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Connect Device"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/page.tsx",
-                                                            lineNumber: 429,
+                                                            lineNumber: 434,
                                                             columnNumber: 27
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/page.tsx",
-                                                    lineNumber: 424,
+                                                    lineNumber: 429,
                                                     columnNumber: 25
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 355,
+                                            lineNumber: 360,
                                             columnNumber: 21
                                         }, this)
                                     ]
                                 }, index, true, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 324,
+                                    lineNumber: 329,
                                     columnNumber: 19
                                 }, this);
                             })
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 317,
+                            lineNumber: 322,
                             columnNumber: 13
                         }, this)
                     ]
@@ -1728,7 +1280,7 @@ function Home() {
                             className: "w-16 h-16 text-gray-300 mx-auto mb-4"
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 442,
+                            lineNumber: 447,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1736,7 +1288,7 @@ function Home() {
                             children: "No Devices Found"
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 443,
+                            lineNumber: 448,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1744,24 +1296,24 @@ function Home() {
                             children: "Waiting for devices to connect to the network..."
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 444,
+                            lineNumber: 449,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/page.tsx",
-                    lineNumber: 441,
+                    lineNumber: 446,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/page.tsx",
-            lineNumber: 158,
+            lineNumber: 162,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 157,
+        lineNumber: 161,
         columnNumber: 5
     }, this);
 }

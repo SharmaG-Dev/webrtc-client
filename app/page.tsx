@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { DeviceData, useDeviceInfo } from "@/hooks/useDeviceInfo"
 import { useSocket } from "@/hooks/useSocket"
-import { useWebRTC } from "@/hooks/useWebRTC"
 import {
   Plug,
   Unplug,
@@ -17,9 +16,9 @@ import {
   Wifi,
   Monitor,
   Globe2,
-  Send,
-  MessageSquare
+  AlertCircle
 } from "lucide-react"
+import { useWebRTC } from "@/provider/useWebRTC"
 
 export default function Home() {
   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
@@ -27,21 +26,15 @@ export default function Home() {
   const [deviceConnected, setDeviceConnected] = useState<boolean | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
   const [devices, setDevices] = useState<DeviceData[]>([])
-  const [messageInput, setMessageInput] = useState<{ [key: string]: string }>({})
 
-  // Initialize WebRTC with renamed prop
-  const { 
-    connectToDevice, 
-    disconnectFromDevice, 
-    sendMessage, 
-    isDeviceConnected,
-    connectionStatuses,
-    receivedMessages 
-  } = useWebRTC({
-    emit,
-    on,
-    isSocketConnected // Renamed to avoid conflict
-  })
+  const {
+    peerConnections,
+    connectDevice,
+    createOffer,
+    message,
+    connectedDevices,
+    disconnectDevice
+  } = useWebRTC();
 
   // Check device connection status
   const checkConnection = useCallback(() => {
@@ -109,16 +102,15 @@ export default function Home() {
       console.error('❌ No device IP found')
       return
     }
-
-    console.log('🔗 Connecting to device via WebRTC:', device)
-
+    
     try {
-      await connectToDevice(device)
+      await connectDevice(deviceIp)
+      await createOffer(deviceIp)
       console.log('✅ Connection initiated for:', deviceIp)
     } catch (error) {
       console.error('❌ Failed to connect:', error)
     }
-  }, [connectToDevice])
+  }, [connectDevice, createOffer])
 
   // Handle WebRTC device disconnection
   const handleDisconnectDevice = useCallback((device: DeviceData) => {
@@ -126,22 +118,13 @@ export default function Home() {
     if (!deviceIp) return
 
     console.log('🔌 Disconnecting from device:', deviceIp)
-    disconnectFromDevice(deviceIp)
-  }, [disconnectFromDevice])
-
-  // Handle send message
-  const handleSendMessage = useCallback((deviceIp: string) => {
-    const message = messageInput[deviceIp]?.trim()
-    if (!message) return
-
-    const success = sendMessage(deviceIp, message)
-    if (success) {
-      setMessageInput(prev => ({ ...prev, [deviceIp]: '' }))
-    }
-  }, [messageInput, sendMessage])
+    disconnectDevice(deviceIp)
+  }, [disconnectDevice])
 
   const handleClearData = () => {
     emit('clear')
+    setDevices([])
+    setDeviceConnected(null)
   }
 
   if (loading) {
@@ -194,6 +177,35 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        {/* Message Notifications */}
+        {message.length > 0 && (
+          <div className="space-y-2">
+            {message.map((msg:any, idx:number) => (
+              <div
+                key={idx}
+                className={`rounded-lg p-4 flex items-center space-x-3 ${
+                  msg.messageType === 'success'
+                    ? 'bg-green-50 border border-green-200'
+                    : 'bg-red-50 border border-red-200'
+                }`}
+              >
+                {msg.messageType === 'success' ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                )}
+                <span
+                  className={`font-medium ${
+                    msg.messageType === 'success' ? 'text-green-700' : 'text-red-700'
+                  }`}
+                >
+                  {msg.message}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -252,38 +264,26 @@ export default function Home() {
 
           <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
             <div className="flex items-center space-x-3">
-              <div className={`w-3 h-3 rounded-full ${connectionStatuses.size > 0 ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`}></div>
+              <div className={`w-3 h-3 rounded-full ${connectedDevices.size > 0 ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`}></div>
               <div className="flex-1">
                 <p className="text-xs text-gray-500 uppercase tracking-wide">Active WebRTC</p>
-                <button onClick={handleClearData}>Clear All</button>
-                <p className="text-lg font-semibold text-blue-600">
-                  {Array.from(connectionStatuses.values()).filter(s => s.status === 'connected').length} Connected
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-lg font-semibold text-blue-600">
+                    {connectedDevices.size} Connected
+                  </p>
+                  {devices.length > 0 && (
+                    <button 
+                      onClick={handleClearData}
+                      className="text-xs text-red-600 hover:text-red-800 font-medium"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Messages Inbox */}
-        {receivedMessages.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center space-x-2 mb-4">
-              <MessageSquare className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-800">Received Messages</h2>
-            </div>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {receivedMessages.map((msg, idx) => (
-                <div key={idx} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-mono text-blue-600">{msg.from}</span>
-                    <span className="text-xs text-gray-500">{new Date(msg.timestamp).toLocaleTimeString()}</span>
-                  </div>
-                  <p className="text-sm text-gray-800">{msg.message}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {isRegistering && (
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 flex items-center space-x-3">
@@ -321,18 +321,16 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {devices?.map((item, index) => {
-                const deviceIp = item?.deviceInfo?.deviceIp || ''
-                const isWebRTCConnected = isDeviceConnected(deviceIp)
-                const connectionStatus = connectionStatuses.get(deviceIp)
-
+                const isConnected = connectedDevices.has(item?.deviceInfo?.deviceIp);
+                
                 return (
                   <div
                     key={index}
                     className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <div className={`p-4 ${
-                      isWebRTCConnected 
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                      isConnected
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-600'
                         : 'bg-gradient-to-r from-blue-500 to-purple-600'
                     }`}>
                       <div className="flex items-center justify-between">
@@ -345,15 +343,15 @@ export default function Home() {
                             <h3 className="text-white font-semibold text-lg">
                               {item?.deviceInfo?.name || 'Unknown Device'}
                             </h3>
-                            <p className="text-blue-100 text-xs">
+                            <p className="text-white/80 text-xs">
                               {item?.deviceInfo?.deviceType || 'Unknown Type'}
                             </p>
                           </div>
                         </div>
 
                         <div className={`w-3 h-3 rounded-full ${
-                          isWebRTCConnected ? 'bg-white' : 'bg-green-400'
-                        } animate-pulse`}></div>
+                          isConnected ? 'bg-white animate-pulse' : 'bg-green-400'
+                        }`}></div>
                       </div>
                     </div>
 
@@ -373,58 +371,29 @@ export default function Home() {
                         <div className="flex-1">
                           <p className="text-xs text-gray-500">IP Address</p>
                           <p className="text-sm font-medium font-mono">
-                            {deviceIp || 'Not Available'}
+                            {item?.deviceInfo?.deviceIp || 'Not Available'}
                           </p>
                         </div>
                       </div>
 
-                      {connectionStatus && (
-                        <div className={`flex items-center space-x-2 rounded-lg p-2 ${
-                          connectionStatus.status === 'connected' ? 'bg-green-50 border border-green-200' :
-                          connectionStatus.status === 'connecting' ? 'bg-yellow-50 border border-yellow-200' :
-                          'bg-red-50 border border-red-200'
-                        }`}>
-                          {connectionStatus.status === 'connected' && <CheckCircle2 className="w-4 h-4 text-green-600" />}
-                          {connectionStatus.status === 'connecting' && <Loader2 className="w-4 h-4 text-yellow-600 animate-spin" />}
-                          {connectionStatus.status === 'failed' && <XCircle className="w-4 h-4 text-red-600" />}
-                          <span className="text-xs font-medium capitalize">
-                            {connectionStatus.status}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Message Input - Only show when connected */}
-                      {isWebRTCConnected && (
-                        <div className="space-y-2">
-                          <div className="flex space-x-2">
-                            <input
-                              type="text"
-                              value={messageInput[deviceIp] || ''}
-                              onChange={(e) => setMessageInput(prev => ({ ...prev, [deviceIp]: e.target.value }))}
-                              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(deviceIp)}
-                              placeholder="Type a message..."
-                              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <button
-                              onClick={() => handleSendMessage(deviceIp)}
-                              className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors"
-                            >
-                              <Send className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
                       <div className="border-t border-gray-200 my-3"></div>
 
-                      {isWebRTCConnected ? (
-                        <button
-                          onClick={() => handleDisconnectDevice(item)}
-                          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md flex items-center justify-center space-x-2"
-                        >
-                          <Unplug className="w-4 h-4" />
-                          <span>Disconnect</span>
-                        </button>
+                      {isConnected ? (
+                        <div className="space-y-2">
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle2 className="w-5 h-5 text-green-600" />
+                              <span className="text-green-700 font-medium text-sm">Connected via WebRTC</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDisconnectDevice(item)}
+                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md flex items-center justify-center space-x-2"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            <span>Disconnect</span>
+                          </button>
+                        </div>
                       ) : (
                         <button
                           onClick={() => handleConnectDevice(item)}
@@ -436,13 +405,13 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </>
         )}
 
-        {devices.length === 0 && isSocketConnected && (
+        {devices.length === 0 && isSocketConnected && !isRegistering && (
           <div className="bg-white rounded-2xl shadow-lg p-12 border border-gray-100 text-center">
             <Smartphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No Devices Found</h3>

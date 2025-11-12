@@ -56,6 +56,11 @@ export function useSocket() {
     socketRef.current?.on(event, callback)
     return () => socketRef.current?.off(event, callback)
   }, [])
+  const off = useCallback((event: string, callback: (...args: any[]) => void) => {
+    socketRef.current?.off(event, callback)
+    return () => socketRef.current?.off(event, callback)
+  }, [])
 
-  return { socket: socketRef.current, isConnected, connect, disconnect, emit, on }
+
+  return { socket: socketRef.current, isConnected, connect, disconnect, emit, on ,off }
 }
