@@ -21,7 +21,6 @@ import {
 import { useWebRTC } from "@/provider/useWebRTC"
 import ChatBox from "@/components/chatBox"
 
-
 export default function Home() {
   const { isConnected: isSocketConnected, connect, disconnect, emit, on } = useSocket()
   const { deviceInfo, loading } = useDeviceInfo()
@@ -29,6 +28,7 @@ export default function Home() {
   const [isRegistering, setIsRegistering] = useState(false)
   const [devices, setDevices] = useState<DeviceData[]>([])
   const [activeChatDevices, setActiveChatDevices] = useState<Set<string>>(new Set())
+  const [incomingConnections, setIncomingConnections] = useState<Map<string, { name: string, ip: string }>>(new Map())
 
   const {
     connectAndCreateOffer,
@@ -47,6 +47,54 @@ export default function Home() {
       }
     });
   }, [connectedDevices, activeChatDevices]);
+
+  // Listen for incoming connection events
+  useEffect(() => {
+    if (!isSocketConnected) return;
+
+    const handleIncomingConnection = (data: { fromIp: string, fromName?: string }) => {
+      console.log('📞 Incoming connection from:', data.fromIp);
+      
+      setIncomingConnections(prev => {
+        const newMap = new Map(prev);
+        newMap.set(data.fromIp, {
+          name: data.fromName || 'Unknown Device',
+          ip: data.fromIp
+        });
+        return newMap;
+      });
+    };
+
+    on('incoming-connection', handleIncomingConnection);
+
+    return () => {
+      // Cleanup listener
+    };
+  }, [isSocketConnected, on]);
+
+  // Merge devices list with incoming connections
+  const allDevices = [
+    ...devices,
+    ...Array.from(incomingConnections.entries()).map(([ip, info]) => ({
+      deviceInfo: {
+        deviceIp: ip,
+        name: info.name,
+        deviceType: 'Web' as const,
+        deviceModel: 'Unknown'
+      },
+      active: true,
+      pairedDevices: []
+    }))
+  ];
+
+  // Remove duplicates based on deviceIp
+  const uniqueDevices = allDevices.reduce((acc, device) => {
+    const existingIndex = acc.findIndex(d => d.deviceInfo.deviceIp === device.deviceInfo.deviceIp);
+    if (existingIndex === -1) {
+      acc.push(device);
+    }
+    return acc;
+  }, [] as DeviceData[]);
 
   // Check device connection status
   const checkConnection = useCallback(() => {
@@ -100,6 +148,7 @@ export default function Home() {
       disconnect()
       setDeviceConnected(null)
       setDevices([])
+      setIncomingConnections(new Map())
     } else {
       connect()
       setTimeout(() => emit('show-devices'), 1000)
@@ -137,12 +186,20 @@ export default function Home() {
       newSet.delete(deviceIp);
       return newSet;
     });
+
+    // Remove from incoming connections
+    setIncomingConnections(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(deviceIp);
+      return newMap;
+    });
   }, [disconnectDevice])
 
   const handleClearData = () => {
     emit('clear')
     setDevices([])
     setDeviceConnected(null)
+    setIncomingConnections(new Map())
   }
 
   if (loading) {
@@ -297,7 +354,7 @@ export default function Home() {
                   <p className="text-lg font-semibold text-blue-600">
                     {connectedDevices.size} Connected
                   </p>
-                  {devices.length > 0 && (
+                  {uniqueDevices.length > 0 && (
                     <button 
                       onClick={handleClearData}
                       className="text-xs text-red-600 hover:text-red-800 font-medium"
@@ -336,17 +393,17 @@ export default function Home() {
         </div>
 
         {/* Devices Grid */}
-        {devices.length > 0 && (
+        {uniqueDevices.length > 0 && (
           <>
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
               <h2 className="text-xl font-bold text-gray-800 mb-2">Available Devices</h2>
               <p className="text-gray-500 text-sm">
-                {devices.length} device{devices.length !== 1 ? 's' : ''} found on the network
+                {uniqueDevices.length} device{uniqueDevices.length !== 1 ? 's' : ''} found on the network
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {devices?.map((item, index) => {
+              {uniqueDevices?.map((item, index) => {
                 const isConnected = connectedDevices.has(item?.deviceInfo?.deviceIp);
                 const isChatActive = activeChatDevices.has(item?.deviceInfo?.deviceIp);
                 
@@ -455,7 +512,7 @@ export default function Home() {
           </>
         )}
 
-        {devices.length === 0 && isSocketConnected && !isRegistering && (
+        {uniqueDevices.length === 0 && isSocketConnected && !isRegistering && (
           <div className="bg-white rounded-2xl shadow-lg p-12 border border-gray-100 text-center">
             <Smartphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No Devices Found</h3>
