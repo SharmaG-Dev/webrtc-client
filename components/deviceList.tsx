@@ -34,9 +34,9 @@ export default function DeviceList({
   )
 
   return (
-    <div className="w-full h-full bg-white flex flex-col">
-      {/* Search Bar - Responsive padding */}
-      <div className="p-3 sm:p-4 border-b border-gray-200 flex-shrink-0">
+    <div className="w-full h-full bg-white flex flex-col overflow-hidden">
+      {/* Search Bar - Fixed at top */}
+      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -49,15 +49,15 @@ export default function DeviceList({
         </div>
       </div>
 
-      {/* Device Count - Responsive text */}
-      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border-b border-gray-200 flex-shrink-0">
+      {/* Device Count - Fixed */}
+      <div className="flex-shrink-0 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border-b border-gray-200">
         <p className="text-xs sm:text-sm font-medium text-gray-700">
           {filteredDevices.length} Device{filteredDevices.length !== 1 ? 's' : ''} Available
         </p>
       </div>
 
       {/* Device List - Scrollable */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overscroll-contain min-h-0">
         {filteredDevices.length > 0 ? (
           <div className="divide-y divide-gray-200">
             {filteredDevices.map((device, index) => (

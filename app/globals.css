@@ -1,2 +1,42 @@
 @import "tailwindcss";
 
+
+/* Fix mobile overflow issues */
+@layer base {
+  html,
+  body {
+    @apply overflow-hidden;
+    @apply h-full;
+    @apply w-full;
+    position: relative;
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Safe area for mobile devices with notches */
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth scrolling for messages */
+@layer utilities {
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+}

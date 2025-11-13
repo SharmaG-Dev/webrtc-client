@@ -170,28 +170,43 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div className="h-screen w-screen flex flex-col bg-gray-100 overflow-hidden">
+      {/* Header - Fixed height */}
+      <div className="flex-shrink-0">
+        <Header 
+          isSocketConnected={isSocketConnected}
+          onToggleConnection={handleToggleConnection}
+          deviceInfo={deviceInfo}
+        />
+      </div>
 
-      <Header 
-        isSocketConnected={isSocketConnected}
-        onToggleConnection={handleToggleConnection}
-        deviceInfo={deviceInfo}
-      />
-      <ConnectionStatus 
-        isSocketConnected={isSocketConnected}
-        deviceConnected={deviceConnected}
-        connectedDevicesCount={connectedDevices.size}
-        isRegistering={isRegistering}
-        onClearData={handleClearData}
-        hasDevices={uniqueDevices.length > 0}
-      />
-      <NotificationBar messages={message} onRemoveMessage={removeMessage} />
-      <div className="flex-1 flex overflow-hidden">
+      {/* Connection Status Bar - Fixed height */}
+      <div className="flex-shrink-0">
+        <ConnectionStatus 
+          isSocketConnected={isSocketConnected}
+          deviceConnected={deviceConnected}
+          connectedDevicesCount={connectedDevices.size}
+          isRegistering={isRegistering}
+          onClearData={handleClearData}
+          hasDevices={uniqueDevices.length > 0}
+        />
+      </div>
+
+      {/* Notification Messages - Fixed height with scroll if needed */}
+      {message.length > 0 && (
+        <div className="flex-shrink-0 max-h-32 overflow-y-auto">
+          <NotificationBar messages={message} onRemoveMessage={removeMessage} />
+        </div>
+      )}
+
+      {/* Main Chat Layout - Fills remaining space */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* Left Panel - Device List */}
         <div className={`${
           selectedDevice 
             ? 'hidden md:flex md:w-80 lg:w-96' 
             : 'w-full md:w-80 lg:w-96'
-        } flex-shrink-0 border-r border-gray-200 bg-white transition-all duration-300`}>
+        } flex-shrink-0 border-r border-gray-200 bg-white overflow-hidden`}>
           <DeviceList 
             devices={uniqueDevices}
             connectedDevices={connectedDevices}
@@ -203,11 +218,13 @@ export default function Home() {
             isRegistering={isRegistering}
           />
         </div>
+
+        {/* Right Panel - Chat Area */}
         <div className={`${
           selectedDevice 
-            ? 'w-full flex' 
-            : 'hidden md:flex'
-        } flex-1 transition-all duration-300`}>
+            ? 'flex w-full' 
+            : 'hidden md:flex md:flex-1'
+        } overflow-hidden`}>
           <ChatPanel 
             selectedDevice={selectedDevice}
             dataChannel={selectedDevice ? dataChannels.get(selectedDevice.deviceInfo.deviceIp) || null : null}

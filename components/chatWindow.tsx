@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import { Send, Smartphone, Monitor, Globe2, MoreVertical, X, ArrowLeft } from 'lucide-react'
 import MessageBubble from './messageBubble'
 
-
 interface Message {
   id: string
   text: string
@@ -99,11 +98,11 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white h-full">
-      {/* Chat Header - Responsive */}
-      <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-between gap-2 flex-shrink-0">
+    <div className="w-full h-full flex flex-col bg-white overflow-hidden">
+      {/* Chat Header - Fixed at top */}
+      <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-          {/* Back Button - Only visible on mobile */}
+          {/* Back Button - Mobile only */}
           {onBack && (
             <button
               onClick={onBack}
@@ -159,30 +158,32 @@ export default function ChatWindow({
         </div>
       </div>
 
-      {/* Messages Area - Scrollable with responsive padding */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 bg-gray-50">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center px-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                {getDeviceIcon()}
+      {/* Messages Area - Scrollable, fills available space */}
+      <div className="flex-1 overflow-y-auto overscroll-contain bg-gray-50 min-h-0">
+        <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center min-h-full py-12">
+              <div className="text-center px-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  {getDeviceIcon()}
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Start Chatting</h3>
+                <p className="text-gray-500 text-xs sm:text-sm">Send a message to begin the conversation</p>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Start Chatting</h3>
-              <p className="text-gray-500 text-xs sm:text-sm">Send a message to begin the conversation</p>
             </div>
-          </div>
-        ) : (
-          <>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
-            ))}
-            <div ref={messagesEndRef} />
-          </>
-        )}
+          ) : (
+            <>
+              {messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Input Area - Responsive padding */}
-      <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 bg-white border-t border-gray-200 flex-shrink-0">
+      {/* Input Area - Fixed at bottom */}
+      <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 py-3 sm:py-4 bg-white border-t border-gray-200 safe-bottom">
         <div className="flex items-center gap-2 sm:gap-3">
           <input
             ref={inputRef}
@@ -197,7 +198,7 @@ export default function ChatWindow({
           <button
             onClick={sendMessage}
             disabled={!inputMessage.trim() || !dataChannel || dataChannel.readyState !== 'open'}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:transform-none disabled:cursor-not-allowed shadow-lg flex-shrink-0"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-200 transform active:scale-95 disabled:transform-none disabled:cursor-not-allowed shadow-lg flex-shrink-0"
           >
             <Send className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
