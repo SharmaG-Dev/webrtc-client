@@ -1,0 +1,805 @@
+module.exports = [
+"[externals]/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js [external] (next/dist/compiled/next-server/app-page-turbo.runtime.dev.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js", () => require("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js"));
+
+module.exports = mod;
+}),
+"[project]/provider/useWebRTC.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "WebRTCContext",
+    ()=>WebRTCContext,
+    "WebRtcProvider",
+    ()=>WebRtcProvider,
+    "useWebRTC",
+    ()=>useWebRTC
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+(()=>{
+    const e = new Error("Cannot find module '@/hooks/useSocket'");
+    e.code = 'MODULE_NOT_FOUND';
+    throw e;
+})();
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+"use client";
+;
+;
+;
+const WebRTCContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createContext"])(null);
+const useWebRTC = ()=>{
+    const context = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContext"])(WebRTCContext);
+    if (!context) {
+        throw new Error('useWebRTC must be used within a WebRtcProvider');
+    }
+    return context;
+};
+const WebRtcProvider = ({ children })=>{
+    const { emit, isConnected, on, off } = useSocket();
+    const [message, setMessage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [peerConnections, setPeerConnections] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Map());
+    const peerConnectionsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(new Map());
+    const [connectedDevices, setConnectedDevices] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Set());
+    const [dataChannels, setDataChannels] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(new Map());
+    const dataChannelsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(new Map());
+    const pushMessage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(({ message, messageType })=>{
+        setMessage((prev)=>[
+                ...prev,
+                {
+                    message,
+                    messageType
+                }
+            ]);
+        if (messageType === 'success') {
+            setTimeout(()=>{
+                removeMessage({
+                    message,
+                    messageType
+                });
+            }, 5000);
+        }
+    }, []);
+    const removeMessage = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(({ message, messageType })=>{
+        setMessage((prev)=>prev.filter((item)=>!(item.message === message && item.messageType === messageType)));
+    }, []);
+    const setupPeerConnectionListeners = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((peerConnection, deviceIp)=>{
+        // Connection state change listener
+        peerConnection.addEventListener('connectionstatechange', ()=>{
+            console.log(`📡 Connection state for ${deviceIp}: ${peerConnection.connectionState}`);
+            switch(peerConnection.connectionState){
+                case 'connected':
+                    console.log('✅ WebRTC connection established with:', deviceIp);
+                    emit('webrtc-connected', {
+                        targetIp: deviceIp
+                    });
+                    setConnectedDevices((prev)=>new Set(prev).add(deviceIp));
+                    pushMessage({
+                        message: `Connected to ${deviceIp}`,
+                        messageType: 'success'
+                    });
+                    break;
+                case 'connecting':
+                    console.log('🔄 Connecting to:', deviceIp);
+                    break;
+                case 'disconnected':
+                    console.log('⚠️ WebRTC connection disconnected:', deviceIp);
+                    setConnectedDevices((prev)=>{
+                        const newSet = new Set(prev);
+                        newSet.delete(deviceIp);
+                        return newSet;
+                    });
+                    break;
+                case 'failed':
+                    console.log('❌ WebRTC connection failed:', deviceIp);
+                    setConnectedDevices((prev)=>{
+                        const newSet = new Set(prev);
+                        newSet.delete(deviceIp);
+                        return newSet;
+                    });
+                    emit('webrtc-disconnected', {
+                        targetIp: deviceIp
+                    });
+                    pushMessage({
+                        message: `Connection failed with ${deviceIp}`,
+                        messageType: 'error'
+                    });
+                    break;
+                case 'closed':
+                    console.log('🔒 WebRTC connection closed:', deviceIp);
+                    setConnectedDevices((prev)=>{
+                        const newSet = new Set(prev);
+                        newSet.delete(deviceIp);
+                        return newSet;
+                    });
+                    emit('webrtc-disconnected', {
+                        targetIp: deviceIp
+                    });
+                    break;
+            }
+        });
+        // ICE connection state change listener
+        peerConnection.addEventListener('iceconnectionstatechange', ()=>{
+            console.log(`🧊 ICE connection state for ${deviceIp}: ${peerConnection.iceConnectionState}`);
+        });
+        // ICE gathering state change listener
+        peerConnection.addEventListener('icegatheringstatechange', ()=>{
+            console.log(`📡 ICE gathering state for ${deviceIp}: ${peerConnection.iceGatheringState}`);
+        });
+        // Signaling state change listener
+        peerConnection.addEventListener('signalingstatechange', ()=>{
+            console.log(`📶 Signaling state for ${deviceIp}: ${peerConnection.signalingState}`);
+        });
+        // ICE candidate handler
+        peerConnection.onicecandidate = (event)=>{
+            if (event.candidate) {
+                console.log('🧊 Sending ICE candidate to:', deviceIp, event.candidate.type);
+                emit('ice-candidate', {
+                    targetIp: deviceIp,
+                    candidate: event.candidate.toJSON()
+                });
+            } else {
+                console.log('✅ ICE gathering complete for:', deviceIp);
+            }
+        };
+        // DataChannel listener (for receiving side)
+        peerConnection.addEventListener('datachannel', (event)=>{
+            console.log('📨 DataChannel received from:', deviceIp);
+            const dataChannel = event.channel;
+            setupDataChannelListeners(dataChannel, deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.set(deviceIp, dataChannel);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        });
+    }, [
+        emit,
+        pushMessage
+    ]);
+    const setupDataChannelListeners = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((dataChannel, deviceIp)=>{
+        dataChannel.addEventListener('open', ()=>{
+            console.log('✅ DataChannel opened for:', deviceIp);
+            pushMessage({
+                message: `Chat ready with ${deviceIp}`,
+                messageType: 'success'
+            });
+        });
+        dataChannel.addEventListener('close', ()=>{
+            console.log('❌ DataChannel closed for:', deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.delete(deviceIp);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        });
+        dataChannel.addEventListener('error', (error)=>{
+            console.error('❌ DataChannel error:', error);
+        });
+    }, [
+        pushMessage
+    ]);
+    const connectAndCreateOffer = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (deviceIp)=>{
+        if (!isConnected) {
+            pushMessage({
+                message: 'Socket is not connected',
+                messageType: 'error'
+            });
+            return;
+        }
+        if (!deviceIp) {
+            pushMessage({
+                message: 'Invalid device IP',
+                messageType: 'error'
+            });
+            return;
+        }
+        let peerConnection = peerConnectionsRef.current.get(deviceIp);
+        if (!peerConnection) {
+            console.log('🔌 Creating peer connection for:', deviceIp);
+            peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    {
+                        urls: 'stun:stun.l.google.com:19302'
+                    },
+                    {
+                        urls: 'stun:stun1.l.google.com:19302'
+                    },
+                    {
+                        urls: 'stun:stun2.l.google.com:19302'
+                    }
+                ],
+                iceCandidatePoolSize: 10
+            });
+            setupPeerConnectionListeners(peerConnection, deviceIp);
+            // Create DataChannel (for initiating side)
+            console.log('📨 Creating DataChannel for:', deviceIp);
+            const dataChannel = peerConnection.createDataChannel('chat', {
+                ordered: true
+            });
+            setupDataChannelListeners(dataChannel, deviceIp);
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.set(deviceIp, dataChannel);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+            // Update both ref and state
+            const newPeerConnections = new Map(peerConnectionsRef.current);
+            newPeerConnections.set(deviceIp, peerConnection);
+            peerConnectionsRef.current = newPeerConnections;
+            setPeerConnections(newPeerConnections);
+        }
+        try {
+            console.log('📤 Creating offer for:', deviceIp);
+            const offer = await peerConnection.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            });
+            console.log('📝 Setting local description (offer)');
+            await peerConnection.setLocalDescription(offer);
+            console.log('📤 Sending offer via socket');
+            emit('offer', {
+                targetIp: deviceIp,
+                sdp: peerConnection.localDescription
+            });
+        } catch (error) {
+            console.error('❌ Error creating offer:', error);
+            pushMessage({
+                message: 'Failed to create offer',
+                messageType: 'error'
+            });
+        }
+    }, [
+        isConnected,
+        emit,
+        pushMessage,
+        setupPeerConnectionListeners,
+        setupDataChannelListeners
+    ]);
+    const createAnswer = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (deviceIp)=>{
+        if (!isConnected) {
+            pushMessage({
+                message: 'Socket is not connected',
+                messageType: 'error'
+            });
+            return;
+        }
+        if (!deviceIp) {
+            pushMessage({
+                message: 'Invalid device IP',
+                messageType: 'error'
+            });
+            return;
+        }
+        const peerConnection = peerConnectionsRef.current.get(deviceIp);
+        if (!peerConnection) {
+            pushMessage({
+                message: 'Peer connection not found',
+                messageType: 'error'
+            });
+            return;
+        }
+        try {
+            console.log('📥 Creating answer for:', deviceIp);
+            const answer = await peerConnection.createAnswer();
+            console.log('📝 Setting local description (answer)');
+            await peerConnection.setLocalDescription(answer);
+            console.log('📤 Sending answer via socket');
+            emit('answer', {
+                targetIp: deviceIp,
+                sdp: peerConnection.localDescription
+            });
+            return answer;
+        } catch (error) {
+            console.error('❌ Error creating answer:', error);
+            pushMessage({
+                message: 'Failed to create answer',
+                messageType: 'error'
+            });
+        }
+    }, [
+        isConnected,
+        emit,
+        pushMessage
+    ]);
+    const disconnectDevice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((deviceIp)=>{
+        const peerConnection = peerConnectionsRef.current.get(deviceIp);
+        const dataChannel = dataChannelsRef.current.get(deviceIp);
+        if (dataChannel) {
+            console.log('📨 Closing DataChannel for:', deviceIp);
+            dataChannel.close();
+            const newDataChannels = new Map(dataChannelsRef.current);
+            newDataChannels.delete(deviceIp);
+            dataChannelsRef.current = newDataChannels;
+            setDataChannels(newDataChannels);
+        }
+        if (peerConnection) {
+            console.log('🔌 Closing peer connection for:', deviceIp);
+            peerConnection.close();
+            const newPeerConnections = new Map(peerConnectionsRef.current);
+            newPeerConnections.delete(deviceIp);
+            peerConnectionsRef.current = newPeerConnections;
+            setPeerConnections(newPeerConnections);
+            setConnectedDevices((prev)=>{
+                const newSet = new Set(prev);
+                newSet.delete(deviceIp);
+                return newSet;
+            });
+            emit('webrtc-disconnected', {
+                targetIp: deviceIp
+            });
+        }
+    }, [
+        emit
+    ]);
+    const createPeerConnectionIfNotExists = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (deviceIp)=>{
+        if (peerConnectionsRef.current.has(deviceIp)) {
+            return peerConnectionsRef.current.get(deviceIp);
+        }
+        console.log('🔌 Creating peer connection for incoming connection:', deviceIp);
+        const peerConnection = new RTCPeerConnection({
+            iceServers: [
+                {
+                    urls: 'stun:stun.l.google.com:19302'
+                },
+                {
+                    urls: 'stun:stun1.l.google.com:19302'
+                },
+                {
+                    urls: 'stun:stun2.l.google.com:19302'
+                }
+            ],
+            iceCandidatePoolSize: 10
+        });
+        setupPeerConnectionListeners(peerConnection, deviceIp);
+        // Update both ref and state
+        const newPeerConnections = new Map(peerConnectionsRef.current);
+        newPeerConnections.set(deviceIp, peerConnection);
+        peerConnectionsRef.current = newPeerConnections;
+        setPeerConnections(newPeerConnections);
+        return peerConnection;
+    }, [
+        setupPeerConnectionListeners
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!isConnected) {
+            return;
+        }
+        // Handle incoming offer
+        const handleOffer = async (data)=>{
+            const fromDeviceIp = data.from;
+            console.log('📥 Received offer from:', fromDeviceIp);
+            const peerConnection = await createPeerConnectionIfNotExists(fromDeviceIp);
+            if (!peerConnection) {
+                pushMessage({
+                    message: 'Failed to create peer connection',
+                    messageType: 'error'
+                });
+                return;
+            }
+            try {
+                console.log('📝 Setting remote description (offer)');
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                console.log('✅ Remote description set successfully');
+                await createAnswer(fromDeviceIp);
+            } catch (error) {
+                console.error('❌ Error handling offer:', error);
+                pushMessage({
+                    message: 'Failed to handle offer',
+                    messageType: 'error'
+                });
+            }
+        };
+        // Handle incoming answer
+        const handleAnswer = async (data)=>{
+            const fromDeviceIp = data.from;
+            console.log('📥 Received answer from:', fromDeviceIp);
+            const peerConnection = peerConnectionsRef.current.get(fromDeviceIp);
+            if (!peerConnection) {
+                console.error('❌ Peer connection not found for answer');
+                pushMessage({
+                    message: 'Peer connection not found',
+                    messageType: 'error'
+                });
+                return;
+            }
+            try {
+                console.log('📝 Setting remote description (answer)');
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                console.log('✅ Remote description (answer) set successfully');
+            } catch (error) {
+                console.error('❌ Error handling answer:', error);
+                pushMessage({
+                    message: 'Failed to handle answer',
+                    messageType: 'error'
+                });
+            }
+        };
+        // Handle incoming ICE candidate
+        const handleIceCandidate = async (data)=>{
+            const fromDeviceIp = data.from;
+            console.log('🧊 Received ICE candidate from:', fromDeviceIp, data.candidate);
+            const peerConnection = peerConnectionsRef.current.get(fromDeviceIp);
+            if (!peerConnection) {
+                console.error('❌ Peer connection not found for ICE candidate');
+                return;
+            }
+            try {
+                if (peerConnection.remoteDescription) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    console.log('✅ ICE candidate added successfully');
+                } else {
+                    console.warn('⚠️ Remote description not set yet, queuing ICE candidate');
+                    // Queue the candidate for later
+                    setTimeout(async ()=>{
+                        if (peerConnection.remoteDescription) {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                            console.log('✅ Queued ICE candidate added successfully');
+                        }
+                    }, 100);
+                }
+            } catch (err) {
+                console.error("❌ Error adding ICE candidate:", err);
+            }
+        };
+        // Handle connection notification from other device
+        const handleWebRTCConnected = (data)=>{
+            console.log('✅ Received connection notification from:', data.fromIp);
+            setConnectedDevices((prev)=>new Set(prev).add(data.fromIp));
+        };
+        // Handle disconnection notification
+        const handleWebRTCDisconnected = (data)=>{
+            console.log('❌ Received disconnection notification from:', data.fromIp);
+            setConnectedDevices((prev)=>{
+                const newSet = new Set(prev);
+                newSet.delete(data.fromIp);
+                return newSet;
+            });
+        };
+        on('offer', handleOffer);
+        on('answer', handleAnswer);
+        on('ice-candidate', handleIceCandidate);
+        on('webrtc-connection-notify', handleWebRTCConnected);
+        on('webrtc-disconnection-notify', handleWebRTCDisconnected);
+        return ()=>{
+            off('offer', handleOffer);
+            off('answer', handleAnswer);
+            off('ice-candidate', handleIceCandidate);
+            off('webrtc-connection-notify', handleWebRTCConnected);
+            off('webrtc-disconnection-notify', handleWebRTCDisconnected);
+        };
+    }, [
+        isConnected,
+        on,
+        off,
+        createAnswer,
+        createPeerConnectionIfNotExists,
+        pushMessage
+    ]);
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(WebRTCContext.Provider, {
+        value: {
+            peerConnections,
+            connectAndCreateOffer,
+            createAnswer,
+            removeMessage,
+            pushMessage,
+            message,
+            connectedDevices,
+            disconnectDevice,
+            dataChannels
+        },
+        children: children
+    }, void 0, false, {
+        fileName: "[project]/provider/useWebRTC.tsx",
+        lineNumber: 450,
+        columnNumber: 9
+    }, ("TURBOPACK compile-time value", void 0));
+};
+}),
+"[project]/store/slices/state.slice.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "addIncomingConnection",
+    ()=>addIncomingConnection,
+    "clearDeviceState",
+    ()=>clearDeviceState,
+    "clearIncomingConnections",
+    ()=>clearIncomingConnections,
+    "default",
+    ()=>__TURBOPACK__default__export__,
+    "deviceSlice",
+    ()=>deviceSlice,
+    "removeIncomingConnection",
+    ()=>removeIncomingConnection,
+    "setDeviceConnected",
+    ()=>setDeviceConnected,
+    "setDevices",
+    ()=>setDevices,
+    "setIsConnected",
+    ()=>setIsConnected,
+    "setIsRegistering",
+    ()=>setIsRegistering,
+    "setSelectedDevice",
+    ()=>setSelectedDevice
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs [app-ssr] (ecmascript) <locals>");
+;
+const initialState = {
+    isConnected: false,
+    devices: [],
+    selectedDevice: null,
+    deviceConnected: null,
+    isRegistering: false,
+    incomingConnections: {}
+};
+const deviceSlice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createSlice"])({
+    name: 'device',
+    initialState,
+    reducers: {
+        setDevices: (state, action)=>{
+            state.devices = action.payload;
+        },
+        setSelectedDevice: (state, action)=>{
+            state.selectedDevice = action.payload;
+        },
+        setDeviceConnected: (state, action)=>{
+            state.deviceConnected = action.payload;
+        },
+        setIsRegistering: (state, action)=>{
+            state.isRegistering = action.payload;
+        },
+        addIncomingConnection: (state, action)=>{
+            state.incomingConnections[action.payload.ip] = {
+                name: action.payload.name,
+                ip: action.payload.ip
+            };
+        },
+        removeIncomingConnection: (state, action)=>{
+            delete state.incomingConnections[action.payload];
+        },
+        clearIncomingConnections: (state)=>{
+            state.incomingConnections = {};
+        },
+        clearDeviceState: (state)=>{
+            state.devices = [];
+            state.selectedDevice = null;
+            state.deviceConnected = null;
+            state.incomingConnections = {};
+        },
+        setIsConnected: (state, action)=>{
+            state.isConnected = action.payload;
+        }
+    }
+});
+const { setDevices, setSelectedDevice, setDeviceConnected, setIsRegistering, addIncomingConnection, removeIncomingConnection, clearIncomingConnections, clearDeviceState, setIsConnected } = deviceSlice.actions;
+const __TURBOPACK__default__export__ = deviceSlice.reducer;
+}),
+"[project]/store/store.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "store",
+    ()=>store
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs [app-ssr] (ecmascript) <locals>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$store$2f$slices$2f$state$2e$slice$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/store/slices/state.slice.ts [app-ssr] (ecmascript)");
+;
+;
+const store = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["configureStore"])({
+    reducer: {
+        device: __TURBOPACK__imported__module__$5b$project$5d2f$store$2f$slices$2f$state$2e$slice$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"]
+    },
+    middleware: (getDefaultMiddleware)=>getDefaultMiddleware({
+            serializableCheck: false
+        })
+});
+}),
+"[project]/store/StoreProvider.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "default",
+    ()=>StoreProvider
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-redux/dist/react-redux.mjs [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$store$2f$store$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/store/store.ts [app-ssr] (ecmascript)");
+'use client';
+;
+;
+;
+function StoreProvider({ children }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Provider"], {
+        store: __TURBOPACK__imported__module__$5b$project$5d2f$store$2f$store$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["store"],
+        children: children
+    }, void 0, false, {
+        fileName: "[project]/store/StoreProvider.tsx",
+        lineNumber: 13,
+        columnNumber: 10
+    }, this);
+}
+}),
+"[externals]/fs [external] (fs, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("fs", () => require("fs"));
+
+module.exports = mod;
+}),
+"[externals]/url [external] (url, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("url", () => require("url"));
+
+module.exports = mod;
+}),
+"[externals]/child_process [external] (child_process, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("child_process", () => require("child_process"));
+
+module.exports = mod;
+}),
+"[externals]/http [external] (http, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("http", () => require("http"));
+
+module.exports = mod;
+}),
+"[externals]/https [external] (https, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("https", () => require("https"));
+
+module.exports = mod;
+}),
+"[externals]/tty [external] (tty, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("tty", () => require("tty"));
+
+module.exports = mod;
+}),
+"[externals]/util [external] (util, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("util", () => require("util"));
+
+module.exports = mod;
+}),
+"[externals]/os [external] (os, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("os", () => require("os"));
+
+module.exports = mod;
+}),
+"[externals]/stream [external] (stream, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("stream", () => require("stream"));
+
+module.exports = mod;
+}),
+"[externals]/zlib [external] (zlib, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("zlib", () => require("zlib"));
+
+module.exports = mod;
+}),
+"[externals]/buffer [external] (buffer, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("buffer", () => require("buffer"));
+
+module.exports = mod;
+}),
+"[externals]/crypto [external] (crypto, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("crypto", () => require("crypto"));
+
+module.exports = mod;
+}),
+"[externals]/events [external] (events, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("events", () => require("events"));
+
+module.exports = mod;
+}),
+"[externals]/net [external] (net, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("net", () => require("net"));
+
+module.exports = mod;
+}),
+"[externals]/tls [external] (tls, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("tls", () => require("tls"));
+
+module.exports = mod;
+}),
+"[project]/provider/useSocket.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "SocketProvider",
+    ()=>SocketProvider,
+    "useSocket",
+    ()=>useSocket
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$socket$2e$io$2d$client$2f$build$2f$esm$2d$debug$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/socket.io-client/build/esm-debug/index.js [app-ssr] (ecmascript) <locals>");
+'use client';
+;
+;
+;
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://werbrtc-server.onrender.com';
+const SocketContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createContext"])(null);
+let socketInstance = null;
+function SocketProvider({ children }) {
+    const [isConnected, setIsConnected] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const socketRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const getSocket = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(()=>{
+        if (!socketInstance) {
+            socketInstance = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$socket$2e$io$2d$client$2f$build$2f$esm$2d$debug$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["io"])(SOCKET_URL, {
+                transports: [
+                    'websocket'
+                ],
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                autoConnect: false
+            });
+        }
+        return socketInstance;
+    }, []);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const socket = getSocket();
+        socketRef.current = socket;
+        const handleConnect = ()=>setIsConnected(true);
+        const handleDisconnect = ()=>setIsConnected(false);
+        socket.on('connect', handleConnect);
+        socket.on('disconnect', handleDisconnect);
+        return ()=>{
+            socket.off('connect', handleConnect);
+            socket.off('disconnect', handleDisconnect);
+        };
+    }, [
+        getSocket
+    ]);
+    const connect = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(()=>{
+        socketRef.current?.connect();
+    }, []);
+    const disconnect = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(()=>{
+        socketRef.current?.disconnect();
+    }, []);
+    const emit = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((event, data)=>{
+        socketRef.current?.emit(event, data);
+    }, []);
+    const on = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((event, callback)=>{
+        socketRef.current?.on(event, callback);
+        return ()=>socketRef.current?.off(event, callback);
+    }, []);
+    const off = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((event, callback)=>{
+        socketRef.current?.off(event, callback);
+        return ()=>socketRef.current?.off(event, callback);
+    }, []);
+    const value = {
+        socket: socketRef.current,
+        isConnected,
+        connect,
+        disconnect,
+        emit,
+        on,
+        off
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(SocketContext.Provider, {
+        value: value,
+        children: children
+    }, void 0, false, {
+        fileName: "[project]/provider/useSocket.tsx",
+        lineNumber: 88,
+        columnNumber: 5
+    }, this);
+}
+function useSocket() {
+    const context = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContext"])(SocketContext);
+    if (!context) {
+        throw new Error('useSocket must be used within a SocketProvider');
+    }
+    return context;
+}
+}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__b8842d38._.js.map

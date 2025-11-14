@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { WebRtcProvider } from "@/provider/useWebRTC";
+import StoreProvider from "@/store/StoreProvider";
+import { Toaster } from "react-hot-toast";
+import { SocketProvider } from "@/provider/useSocket";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,9 +31,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-         <WebRtcProvider>
-        {children}
-         </WebRtcProvider>
+        <Toaster position="bottom-right" />
+        <StoreProvider>
+          <SocketProvider>
+            <WebRtcProvider>
+              {children}
+            </WebRtcProvider>
+          </SocketProvider>
+        </StoreProvider>
+
       </body>
     </html>
   );

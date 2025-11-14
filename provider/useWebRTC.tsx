@@ -1,6 +1,7 @@
 "use client"
-import { useSocket } from "@/hooks/useSocket";
+
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useSocket } from "./useSocket";
 
 interface MessageI { 
     messageType: 'success' | 'error', 

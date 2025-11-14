@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///home/user/webrtc-client/app/page.tsx"],"sourcesContent":["'use client'\n\nimport { Loader2 } from \"lucide-react\"\n\nexport default function Home() {\n\n  return (\n    <div>\n      Home\n    </div>\n  )\n}\n"],"names":[],"mappings":";;;;;AAAA;;AAIe,SAAS;IAEtB,qBACE,8OAAC;kBAAI;;;;;;AAIT","debugId":null}}]
+}
